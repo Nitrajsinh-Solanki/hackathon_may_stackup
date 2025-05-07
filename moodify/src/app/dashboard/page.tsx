@@ -3,7 +3,7 @@
 
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
   Home,
@@ -14,10 +14,16 @@ import {
   LogOut
 } from 'lucide-react';
 import MusicDiscovery from './discover/page';
+import dynamic from 'next/dynamic';
+
+const TrackPage = dynamic(() => import('@/app/dashboard/[trackId]/page'), { ssr: false });
 
 export default function Dashboard() {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const trackId = searchParams.get('track');
+  
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activePage, setActivePage] = useState('home');
@@ -47,7 +53,7 @@ export default function Dashboard() {
   }, [router]);
 
   useEffect(() => {
-    // Set active page based on current path
+    // set active page based on current path
     if (pathname.includes('/upload')) {
       setActivePage('upload');
     } else if (pathname.includes('/my-music')) {
@@ -90,13 +96,12 @@ export default function Dashboard() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
-      {/* Fixed Sidebar - completely fixed, doesn't scroll */}
       <aside className="w-64 bg-gray-900 border-r border-gray-800 fixed inset-y-0 left-0 z-20">
         <div className="p-4 border-b border-gray-800 flex items-center justify-center md:justify-start">
           <h1 className="text-2xl font-bold text-purple-500">Moodify</h1>
         </div>
         
-        {/* Navigation - with its own scrollbar if needed */}
+        {/* navigation - with its own scrollbar if needed */}
         <div className="h-[calc(100vh-64px)] overflow-y-auto">
           <nav className="p-4">
             <ul className="space-y-2">
@@ -131,17 +136,20 @@ export default function Dashboard() {
         </div>
       </aside>
       
-     
       <div className="flex-1 ml-64 flex flex-col h-screen">
-        {/* Fixed Header */}
+        {/* fixed Header */}
         <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 p-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-white">
-              {activePage === 'home' && 'Discover Music'}
-              {activePage === 'upload' && 'Upload Music'}
-              {activePage === 'my-music' && 'My Music'}
-              {activePage === 'library' && 'My Library'}
-              {activePage === 'profile' && 'My Profile'}
+            {trackId ? 'Track Details' : (
+                <>
+                  {activePage === 'home' && 'Discover Music'}
+                  {activePage === 'upload' && 'Upload Music'}
+                  {activePage === 'my-music' && 'My Music'}
+                  {activePage === 'library' && 'My Library'}
+                  {activePage === 'profile' && 'My Profile'}
+                </>
+              )}
             </h2>
             {user && (
               <div className="flex items-center space-x-2">
@@ -154,14 +162,20 @@ export default function Dashboard() {
           </div>
         </header>
         
-        {/* Scrollable Content Area */}
+        {/* scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6">
-            {activePage === 'home' && <MusicDiscovery />}
-            {activePage === 'upload' && <div>Upload Music Component (Coming Soon)</div>}
-            {activePage === 'my-music' && <div>My Music Component (Coming Soon)</div>}
-            {activePage === 'library' && <div>Library Component (Coming Soon)</div>}
-            {activePage === 'profile' && <div>Profile Component (Coming Soon)</div>}
+            {trackId ? (
+              <TrackPage trackId={trackId} />
+            ) : (
+              <>
+                {activePage === 'home' && <MusicDiscovery />}
+                {activePage === 'upload' && <div>Upload Music Component (Coming Soon)</div>}
+                {activePage === 'my-music' && <div>My Music Component (Coming Soon)</div>}
+                {activePage === 'library' && <div>Library Component (Coming Soon)</div>}
+                {activePage === 'profile' && <div>Profile Component (Coming Soon)</div>}
+              </>
+            )}
           </div>
         </main>
       </div>

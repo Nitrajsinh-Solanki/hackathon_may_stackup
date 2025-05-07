@@ -1,5 +1,7 @@
 // moodify\src\lib\audius-api.ts
 
+
+
 // Audius API utility functions
 const AUDIUS_API_BASE_URL = 'https://discoveryprovider.audius.co/v1';
 
@@ -82,7 +84,7 @@ export const moods = [
   'Empowering',
 ];
 
-// Default and load more limits
+// default and load more limits
 export const DEFAULT_LIMIT = 50;
 export const LOAD_MORE_LIMIT = 30;
 
@@ -126,7 +128,7 @@ export const searchTracks = async (
     
     const data: ApiResponse<Track[]> = await response.json();
     
-    // Filter by genre if specified
+    // filter by genre if specified
     if (genre && genre !== 'All Genres') {
       return (data.data || []).filter(track => 
         track.genre && track.genre.toLowerCase() === genre.toLowerCase()
@@ -140,12 +142,33 @@ export const searchTracks = async (
   }
 };
 
+
+
 export const getStreamUrl = (trackId: string): string => {
-  return `${AUDIUS_API_BASE_URL}/tracks/stream/${trackId}`;
+ 
+  return `https://discoveryprovider.audius.co/v1/tracks/${trackId}/stream?app_name=MOODIFY`;
 };
+
 
 export const formatDuration = (seconds: number): string => {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+};
+
+export const getTrackById = async (trackId: string): Promise<Track | null> => {
+  try {
+    const url = `${AUDIUS_API_BASE_URL}/tracks/${trackId}`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Failed to fetch track');
+    }
+    
+    const data: ApiResponse<Track> = await response.json();
+    return data.data || null;
+  } catch (error) {
+    console.error('Error fetching track:', error);
+    return null;
+  }
 };
