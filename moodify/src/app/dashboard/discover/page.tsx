@@ -61,14 +61,14 @@ export default function MusicDiscovery() {
         );
       }
       
-      // Filter by mood if selected
+      // filter by mood if selected
       if (activeMood !== 'All Moods') {
         fetchedTracks = fetchedTracks.filter(track => 
           track.mood && track.mood.toLowerCase() === activeMood.toLowerCase()
         );
       }
       
-      // Sort tracks based on activeSort
+      // sort tracks based on activeSort
       if (activeSort === 'popular') {
         fetchedTracks.sort((a, b) => b.play_count - a.play_count);
       } else if (activeSort === 'recent') {
@@ -213,7 +213,7 @@ export default function MusicDiscovery() {
                   Loading...
                 </>
               ) : (
-                `Load ${LOAD_MORE_LIMIT} More Tracks`
+                `Load More Tracks`
               )}
             </button>
           </div>

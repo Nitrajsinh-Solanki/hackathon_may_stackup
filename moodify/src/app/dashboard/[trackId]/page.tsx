@@ -1,23 +1,23 @@
 // moodify\src\app\dashboard\[trackId]\page.tsx
 
-
-
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Track, getTrackById } from '@/lib/audius-api';
-import { Loader2, ArrowLeft, Play, Heart, Clock, Share2, Download } from 'lucide-react';
+import { Track, getTrackById, getStreamUrl } from '@/lib/audius-api';
+import { Loader2, ArrowLeft, Clock, Heart, Download } from 'lucide-react';
 import MusicPlayer from '@/app/components/MusicPlayer';
 import { formatDuration } from '@/lib/audius-api';
 
-export default function TrackPage({ trackId }: { trackId: string }) {
+export default function TrackPage({ params }: { params: { trackId: string } }) {
+  const trackId = params.trackId;
   const router = useRouter();
   
   const [track, setTrack] = useState<Track | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [isPlaying, setIsPlaying] = useState(false); // Don't auto-play initially
+  const [showPlayer, setShowPlayer] = useState(false);
+
   useEffect(() => {
     const fetchTrack = async () => {
       setIsLoading(true);
@@ -25,7 +25,7 @@ export default function TrackPage({ trackId }: { trackId: string }) {
         const trackData = await getTrackById(trackId);
         if (trackData) {
           setTrack(trackData);
-          setIsPlaying(true);
+          setShowPlayer(true); 
         } else {
           setError('Track not found');
         }
@@ -42,133 +42,131 @@ export default function TrackPage({ trackId }: { trackId: string }) {
     }
     
     return () => {
-     setIsPlaying(false);
+      setIsPlaying(false);
+      setShowPlayer(false);
     };
   }, [trackId]);
-  
+
   const handleBack = () => {
     router.back();
   };
-  
-  const handlePlay = () => {
-    if (track) {
-      setIsPlaying(true);
-    }
-  };
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 size={40} className="animate-spin text-purple-500" />
-      </div>
-    );
-  }
-  
-  if (error || !track) {
-    return (
-      <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-center">
-        <p className="text-red-300">{error || 'Track not found'}</p>
-        <button 
-          onClick={handleBack}
-          className="mt-2 text-sm text-white bg-red-800 hover:bg-red-700 px-4 py-2 rounded-md"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="pb-20">
-      <button 
-        onClick={handleBack}
-        className="flex items-center text-gray-400 hover:text-white mb-6"
-      >
-        <ArrowLeft size={20} className="mr-2" />
-        Back to Discovery
-      </button>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Track Artwork */}
-        <div className="md:col-span-1">
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
-            <img 
-              src={track.artwork['1000x1000'] || track.artwork['480x480'] || '/placeholder-album.png'}
-              alt={track.title}
-              className="w-full aspect-square object-cover"
-            />
-          </div>
-          
-          <div className="mt-4 flex justify-between">
-            <button 
-              onClick={handlePlay}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center"
-            >
-              <Play size={18} className="mr-2" fill="white" />
-              Play Track
-            </button>
-            
-            <div className="flex space-x-2">
-            <button className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full">
-                <Heart size={18} />
-              </button>
-              <button className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full">
-                <Share2 size={18} />
-              </button>
-              <button className="bg-gray-800 hover:bg-gray-700 text-white p-2 rounded-full">
-                <Download size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Track Details */}
-        <div className="md:col-span-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{track.title}</h1>
-          <p className="text-purple-400 text-lg mb-4">{track.user.name}</p>
-          
-          <div className="flex items-center space-x-4 text-sm text-gray-400 mb-6">
-            <div className="flex items-center">
-              <Heart size={16} className="mr-1" />
-              <span>{track.favorite_count.toLocaleString()} likes</span>
-            </div>
-            <div className="flex items-center">
-              <Clock size={16} className="mr-1" />
-              <span>{formatDuration(track.duration)}</span>
-            </div>
-          </div>
-          
-          {track.genre && (
-            <div className="mb-4">
-              <span className="text-gray-400 text-sm">Genre: </span>
-              <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.genre}</span>
-            </div>
-          )}
-          
-          {track.mood && (
-            <div className="mb-4">
-              <span className="text-gray-400 text-sm">Mood: </span>
-              <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.mood}</span>
-            </div>
-          )}
-          
-          {track.description && (
-            <div className="mt-6">
-              <h3 className="text-white text-lg font-medium mb-2">Description</h3>
-              <p className="text-gray-400 whitespace-pre-line">{track.description}</p>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {isPlaying && track && (
-        <MusicPlayer 
-          track={track}
-          onClose={() => setIsPlaying(false)}
-        />
-      )}
-    </div>
-  );
-}
 
-            
+  const handleDownload = () => {
+    if (!track) return;
+    
+    const streamUrl = getStreamUrl(track.id);
+    
+    const downloadLink = document.createElement('a');
+    downloadLink.href = streamUrl;
+    
+    const safeFileName = track.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    downloadLink.download = `${safeFileName}.mp3`;
+       document.body.appendChild(downloadLink);
+       downloadLink.click();
+       document.body.removeChild(downloadLink);
+     };
+   
+     if (isLoading) {
+       return (
+         <div className="flex items-center justify-center h-64">
+           <Loader2 size={40} className="animate-spin text-purple-500" />
+         </div>
+       );
+     }
+   
+     if (error || !track) {
+       return (
+         <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-center">
+           <p className="text-red-300">{error || 'Track not found'}</p>
+           <button 
+             onClick={handleBack}
+             className="mt-2 text-sm text-white bg-red-800 hover:bg-red-700 px-4 py-2 rounded-md"
+           >
+             Go Back
+           </button>
+         </div>
+       );
+     }
+   
+     return (
+       <div className="pb-20">
+         <button 
+           onClick={handleBack}
+           className="flex items-center text-gray-400 hover:text-white mb-6"
+         >
+           <ArrowLeft size={20} className="mr-2" />
+           Back to Discovery
+         </button>
+         
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           {/* track Artwork */}
+           <div className="md:col-span-1">
+             <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+               <img 
+                 src={track.artwork['1000x1000'] || track.artwork['480x480'] || '/placeholder-album.png'}
+                 alt={track.title}
+                 className="w-full aspect-square object-cover"
+               />
+             </div>
+             
+             <div className="mt-4 flex justify-end">
+               <button 
+                 onClick={handleDownload}
+                 className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full flex items-center"
+               >             
+                 <Download size={18} className="mr-2" />
+                 Download Track
+               </button>
+             </div>
+           </div>
+           
+           {/* track Details */}
+           <div className="md:col-span-2">
+             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{track.title}</h1>
+             <p className="text-purple-400 text-lg mb-4">{track.user.name}</p>
+             
+             <div className="flex items-center space-x-4 text-sm text-gray-400 mb-6">
+               <div className="flex items-center">
+                 <Heart size={16} className="mr-1" />
+                 <span>{track.favorite_count.toLocaleString()} likes</span>
+               </div>
+               <div className="flex items-center">
+                 <Clock size={16} className="mr-1" />
+                 <span>{formatDuration(track.duration)}</span>
+               </div>
+             </div>
+             
+             {track.genre && (
+               <div className="mb-4">
+                 <span className="text-gray-400 text-sm">Genre: </span>
+                 <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.genre}</span>
+               </div>
+             )}
+             
+             {track.mood && (
+               <div className="mb-4">
+                 <span className="text-gray-400 text-sm">Mood: </span>
+                 <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.mood}</span>
+               </div>
+             )}
+             
+             {track.description && (
+               <div className="mt-6">
+                 <h3 className="text-white text-lg font-medium mb-2">Description</h3>
+                 <p className="text-gray-400 whitespace-pre-line">{track.description}</p>
+               </div>
+             )}
+           </div>
+         </div>
+         
+         {track && (
+           <MusicPlayer 
+             track={track}
+             onClose={() => setIsPlaying(false)}
+             autoPlay={true}
+           />
+         )}
+       </div>
+     );
+   }
+   

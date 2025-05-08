@@ -1,8 +1,6 @@
 // moodify\src\app\components\MusicPlayer.tsx
 
 
-
-
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Track, getStreamUrl } from "@/lib/audius-api";
@@ -20,11 +18,12 @@ import AudioVisualizer from "./AudioVisualizer";
 interface MusicPlayerProps {
   track: Track;
   onClose: () => void;
+  autoPlay?: boolean;
 }
 
-export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
+export default function MusicPlayer({ track, onClose, autoPlay = false }: MusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); 
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -32,6 +31,7 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
   const [isAudioReady, setIsAudioReady] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [loadAttempts, setLoadAttempts] = useState(0);
+  const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -53,6 +53,15 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
     const handleCanPlay = () => {
       console.log("Audio can play now");
       setIsAudioReady(true);
+      
+
+      if (autoPlay && userInteracted) {
+        audio.play().catch(err => {
+          console.error("Auto-play failed:", err);
+          setIsPlaying(false);
+          setAudioError("Auto-play failed. Please click play to start.");
+        });
+      }
     };
     
     const handleLoadedMetadata = () => {
@@ -109,7 +118,7 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
     audio.addEventListener("timeupdate", handleTimeUpdate);
     audio.addEventListener("ended", handleEnded);
     
-    // Try to load the audio
+    // trying to load the audio
     audio.load();
     
     return () => {
@@ -120,9 +129,31 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [track.id, volume, loadAttempts]);
+  }, [track.id, volume, loadAttempts, autoPlay, userInteracted]);
 
-  // Handle play/pause state changes
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserInteracted(true);
+      
+      if (autoPlay && isAudioReady && !isPlaying && audioRef.current) {
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(err => console.error("Play after interaction failed:", err));
+      }
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, [autoPlay, isAudioReady, isPlaying]);
+
+  // handling play/pause state changes
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !isAudioReady) return;
@@ -135,7 +166,6 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
           console.error("Error playing audio:", err);
           setIsPlaying(false);
           
-          // Check if it's a user interaction error
           if (err.name === "NotAllowedError") {
             setAudioError("Playback requires user interaction. Please click play again.");
           } else {
@@ -148,7 +178,7 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
     }
   }, [isPlaying, isAudioReady]);
 
-  // Handle volume changes
+  // handling the volume changes
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = isMuted ? 0 : volume;
@@ -166,16 +196,19 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
       }
     }
     setIsPlaying(!isPlaying);
+    setUserInteracted(true); 
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     setIsMuted(newVolume === 0);
+    setUserInteracted(true); 
   };
 
   const toggleMute = () => {
     setIsMuted(!isMuted);
+    setUserInteracted(true);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,6 +217,7 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
     if (audioRef.current) {
       audioRef.current.currentTime = seekTime;
     }
+    setUserInteracted(true); 
   };
 
   const formatTime = (time: number) => {
@@ -217,6 +251,9 @@ export default function MusicPlayer({ track, onClose }: MusicPlayerProps) {
               </p>
               {audioError && (
                 <p className="text-red-400 text-xs mt-1">{audioError}</p>
+              )}
+              {!userInteracted && autoPlay && (
+                <p className="text-yellow-400 text-xs mt-1">Click play to start audio</p>
               )}
             </div>
           </div>

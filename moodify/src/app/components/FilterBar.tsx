@@ -1,10 +1,8 @@
 // moodify\src\app\components\FilterBar.tsx
 
-
 'use client';
-
 import { useState } from 'react';
-import { ChevronDown, Filter } from 'lucide-react';
+import { ChevronDown, Filter, X } from 'lucide-react';
 import { genres, moods } from '@/lib/audius-api';
 
 interface FilterBarProps {
@@ -34,13 +32,32 @@ export default function FilterBar({
     { value: 'recent', label: 'Recently Added' }
   ];
 
+  // default values for filters
+  const defaultGenre = 'All Genres';
+  const defaultMood = 'All Moods';
+  const defaultSort = 'trending';
+
+  // function to clear all filters
+  const clearAllFilters = () => {
+    onGenreChange(defaultGenre);
+    onMoodChange(defaultMood);
+    onSortChange(defaultSort);
+    setShowGenreDropdown(false);
+    setShowMoodDropdown(false);
+    setShowSortDropdown(false);
+  };
+
+  const isAnyFilterActive = 
+    activeGenre !== defaultGenre || 
+    activeMood !== defaultMood || 
+    activeSort !== defaultSort;
+
   return (
     <div className="flex flex-wrap items-center gap-3 py-4">
       <div className="flex items-center text-purple-400 mr-2">
         <Filter size={18} className="mr-1" />
         <span className="text-sm font-medium">Filters:</span>
       </div>
-
       {/* genre filter */}
       <div className="relative">
         <button
@@ -74,7 +91,6 @@ export default function FilterBar({
           </div>
         )}
       </div>
-
       {/* mood filter implemented here */}
       <div className="relative">
         <button
@@ -108,7 +124,6 @@ export default function FilterBar({
           </div>
         )}
       </div>
-
       {/* sort filter is implemented here  */}
       <div className="relative">
         <button
@@ -142,6 +157,17 @@ export default function FilterBar({
           </div>
         )}
       </div>
+
+      {/* clear Filters is implemented here  - only shows when filters are active */}
+      {isAnyFilterActive && (
+        <button
+          onClick={clearAllFilters}
+          className="flex items-center bg-purple-700 hover:bg-purple-600 text-white px-4 py-2 rounded-full text-sm ml-auto"
+        >
+          <X size={16} className="mr-1" />
+          <span>Clear Filters</span>
+        </button>
+      )}
     </div>
   );
 }

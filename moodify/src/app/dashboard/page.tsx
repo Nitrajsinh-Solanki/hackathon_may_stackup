@@ -1,6 +1,5 @@
 // moodify\src\app\dashboard\page.tsx
 
-
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
@@ -16,6 +15,7 @@ import {
 import MusicDiscovery from './discover/page';
 import dynamic from 'next/dynamic';
 
+// Correctly define the dynamic import with proper params structure
 const TrackPage = dynamic(() => import('@/app/dashboard/[trackId]/page'), { ssr: false });
 
 export default function Dashboard() {
@@ -137,7 +137,6 @@ export default function Dashboard() {
       </aside>
       
       <div className="flex-1 ml-64 flex flex-col h-screen">
-        {/* fixed Header */}
         <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 p-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-white">
@@ -166,7 +165,7 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6">
             {trackId ? (
-              <TrackPage trackId={trackId} />
+              <TrackPage params={{ trackId }} />
             ) : (
               <>
                 {activePage === 'home' && <MusicDiscovery />}
