@@ -1,18 +1,62 @@
 // moodify\src\models\User.ts
 
-
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+
+export interface UploadedTrack {
+  title: string;
+  artist?: string;
+  cloudinaryUrl: string;
+  coverImage?: string;
+  duration: number;
+  genre?: string;
+  mood?: string;
+  uploadedAt: Date;
+}
 
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
   password: string;
   isVerified: boolean;
+  uploadedTracks: UploadedTrack[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+const uploadedTrackSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  artist: {
+    type: String,
+    trim: true,
+  },
+  cloudinaryUrl: {
+    type: String,
+    required: true,
+  },
+  coverImage: {
+    type: String,
+  },
+  duration: {
+    type: Number,
+    required: true,
+  },
+  genre: {
+    type: String,
+  },
+  mood: {
+    type: String,
+  },
+  uploadedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const userSchema = new mongoose.Schema(
   {
@@ -39,6 +83,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    uploadedTracks: [uploadedTrackSchema],
   },
   {
     timestamps: true,
@@ -47,7 +92,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -62,5 +107,4 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
 };
 
 const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
-
 export default User;
