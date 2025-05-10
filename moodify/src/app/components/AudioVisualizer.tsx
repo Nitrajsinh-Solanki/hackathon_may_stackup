@@ -8,7 +8,8 @@ interface AudioVisualizerProps {
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
-const audioContextMap = new Map<HTMLAudioElement, {
+// global map to track audio contexts and sources across components
+const audioContextMap = new WeakMap<HTMLAudioElement, {
   context: AudioContext,
   source: MediaElementAudioSourceNode,
   analyser: AnalyserNode
@@ -27,7 +28,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
     let analyser: AnalyserNode;
     let source: MediaElementAudioSourceNode;
     
-    // Check if we already have a context for this audio element
+  
     if (audioContextMap.has(audio)) {
       const existing = audioContextMap.get(audio)!;
       audioCtx = existing.context;
@@ -35,17 +36,14 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
       source = existing.source;
       setIsSetup(true);
     } else {
-      
       try {
         audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         analyser = audioCtx.createAnalyser();
         analyser.fftSize = 256;
         
-        
         source = audioCtx.createMediaElementSource(audio);
         source.connect(analyser);
         analyser.connect(audioCtx.destination);
-        
         
         audioContextMap.set(audio, {
           context: audioCtx,
@@ -54,14 +52,12 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
         });
         
         setIsSetup(true);
-        
         console.log("Audio visualizer setup complete");
       } catch (error) {
         console.error("Error setting up audio visualizer:", error);
         return;
       }
     }
-
     
     const resumeAudioContext = () => {
       if (audioCtx.state === "suspended") {
@@ -75,7 +71,6 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
     
     // listen for play events to resume context
     audio.addEventListener("play", resumeAudioContext);
-    
     
     const handleDocumentClick = () => {
       if (audioCtx.state === "suspended") {
@@ -99,7 +94,7 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
     const canvasCtx = canvas.getContext("2d");
     if (!canvasCtx) return;
     
-    // Get the stored audio context and analyser
+    // get the stored audio context and analyser
     const { analyser } = audioContextMap.get(audio)!;
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -148,16 +143,22 @@ const AudioVisualizer: React.FC<AudioVisualizerProps> = ({ audioRef }) => {
     };
   }, [isSetup, audioRef]);
 
+  
   useEffect(() => {
-    return () => {
+    const handleBeforeUnload = () => {
       if (audioRef.current && audioContextMap.has(audioRef.current)) {
-        // clean up when component unmounts
         const { context } = audioContextMap.get(audioRef.current)!;
         if (context.state !== "closed") {
           context.close().catch(err => console.error("Error closing audio context:", err));
         }
         audioContextMap.delete(audioRef.current);
       }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [audioRef]);
 

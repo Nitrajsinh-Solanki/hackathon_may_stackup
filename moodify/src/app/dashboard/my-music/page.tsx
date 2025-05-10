@@ -1,12 +1,19 @@
 // moodify\src\app\dashboard\my-music\page.tsx
 
-
-
-'use client';
-
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Music, Loader2, PlayCircle, PauseCircle } from 'lucide-react';
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Music,
+  Loader2,
+  PlayCircle,
+  PauseCircle,
+  SkipBack,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
+import AudioVisualizer from "@/app/components/AudioVisualizer";
 
 interface UploadedTrack {
   _id: string;
@@ -26,26 +33,31 @@ export default function MyMusic() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentlyPlaying, setCurrentlyPlaying] = useState<string | null>(null);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     const fetchTracks = async () => {
       try {
-        const response = await fetch('/api/my-music');
-
+        const response = await fetch("/api/my-music");
         if (!response.ok) {
           if (response.status === 401) {
-            router.push('/login');
+            router.push("/login");
             return;
           }
-          throw new Error('Failed to fetch tracks');
+          throw new Error("Failed to fetch tracks");
         }
-
         const data = await response.json();
         setTracks(data.tracks || []);
       } catch (err) {
-        console.error('Error fetching tracks:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load your music');
+        console.error("Error fetching tracks:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load your music"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -53,11 +65,36 @@ export default function MyMusic() {
 
     fetchTracks();
 
-    // Cleanup audio on unmount
+    // initializng the  audio element
+    const audio = new Audio();
+    audioRef.current = audio;
+    audio.addEventListener("timeupdate", () => {
+      setCurrentTime(audio.currentTime);
+    });
+    audio.addEventListener("loadedmetadata", () => {
+      setDuration(audio.duration);
+    });
+    audio.addEventListener("ended", () => {
+      setIsPlaying(false);
+      setCurrentlyPlaying(null);
+    });
+    audio.addEventListener("play", () => {
+      setIsPlaying(true);
+    });
+    audio.addEventListener("pause", () => {
+      setIsPlaying(false);
+    });
+
+    // clean up  audio on unmount
     return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = '';
+      if (audio) {
+        audio.pause();
+        audio.src = "";
+        audio.removeEventListener("timeupdate", () => {});
+        audio.removeEventListener("loadedmetadata", () => {});
+        audio.removeEventListener("ended", () => {});
+        audio.removeEventListener("play", () => {});
+        audio.removeEventListener("pause", () => {});
       }
     };
   }, [router]);
@@ -65,45 +102,69 @@ export default function MyMusic() {
   const formatDuration = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const formatDate = (dateString: Date): string => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const handlePlay = (trackId: string, url: string) => {
+    if (!audioRef.current) return;
     if (currentlyPlaying === trackId) {
-      // Pause current track
-      if (audioElement) {
-        audioElement.pause();
+      // toggling play/pause for current track
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current
+          .play()
+          .catch((err) => console.error("Error playing audio:", err));
       }
-      setCurrentlyPlaying(null);
     } else {
-      // Stop current audio if any
-      if (audioElement) {
-        audioElement.pause();
-      }
-
-      // Play new track
-      const audio = new Audio(url);
-      audio.play();
-
-      audio.addEventListener('ended', () => {
-        setCurrentlyPlaying(null);
-      });
-
-      setAudioElement(audio);
+      audioRef.current.src = url;
+      audioRef.current.crossOrigin = "anonymous";
+      audioRef.current.volume = isMuted ? 0 : volume;
+      audioRef.current
+        .play()
+        .catch((err) => console.error("Error playing audio:", err));
       setCurrentlyPlaying(trackId);
     }
   };
 
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const seekTime = parseFloat(e.target.value);
+    setCurrentTime(seekTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = seekTime;
+    }
+  };
+
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    setIsMuted(newVolume === 0);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
+  };
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      if (isMuted) {
+        audioRef.current.volume = volume;
+      } else {
+        audioRef.current.volume = 0;
+      }
+      setIsMuted(!isMuted);
+    }
+  };
+
   const goToUpload = () => {
-    router.push('/dashboard/upload', { scroll: false });
+    router.push("/dashboard/upload", { scroll: false });
   };
 
   if (isLoading) {
@@ -124,6 +185,8 @@ export default function MyMusic() {
     );
   }
 
+  const currentTrack = tracks.find((t) => t._id === currentlyPlaying);
+
   return (
     <div className="pb-20">
       <div className="flex justify-between items-center mb-6">
@@ -135,12 +198,15 @@ export default function MyMusic() {
           Upload New Track
         </button>
       </div>
-
       {tracks.length === 0 ? (
         <div className="text-center py-16 bg-gray-800 rounded-lg border border-gray-700">
           <Music className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-xl font-medium text-gray-300 mb-2">No tracks yet</h3>
-          <p className="text-gray-500 mb-6">Upload your first track to get started</p>
+          <h3 className="text-xl font-medium text-gray-300 mb-2">
+            No tracks yet
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Upload your first track to get started
+          </p>
           <button
             onClick={goToUpload}
             className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
@@ -157,7 +223,6 @@ export default function MyMusic() {
             <div className="col-span-3 md:col-span-2">Uploaded</div>
             <div className="hidden md:block md:col-span-1">Play</div>
           </div>
-
           <div className="divide-y divide-gray-700">
             {tracks.map((track) => (
               <div
@@ -177,15 +242,19 @@ export default function MyMusic() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="text-white font-medium truncate">{track.title}</h3>
-                    <p className="text-gray-400 text-sm truncate">{track.artist}</p>
+                    <h3 className="text-white font-medium truncate">
+                      {track.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm truncate">
+                      {track.artist}
+                    </p>
                   </div>
-                  </div>
+                </div>
                 <div className="hidden md:block md:col-span-2 text-gray-400">
                   {formatDuration(track.duration)}
                 </div>
                 <div className="col-span-3 md:col-span-2 text-gray-400 truncate">
-                  {track.genre || 'Unknown'}
+                  {track.genre || "Unknown"}
                 </div>
                 <div className="col-span-3 md:col-span-2 text-gray-400 text-sm">
                   {formatDate(track.uploadedAt)}
@@ -194,9 +263,13 @@ export default function MyMusic() {
                   <button
                     onClick={() => handlePlay(track._id, track.cloudinaryUrl)}
                     className="text-purple-400 hover:text-purple-300 transition-colors"
-                    aria-label={currentlyPlaying === track._id ? "Pause" : "Play"}
+                    aria-label={
+                      currentlyPlaying === track._id && isPlaying
+                        ? "Pause"
+                        : "Play"
+                    }
                   >
-                    {currentlyPlaying === track._id ? (
+                    {currentlyPlaying === track._id && isPlaying ? (
                       <PauseCircle className="h-6 w-6" />
                     ) : (
                       <PlayCircle className="h-6 w-6" />
@@ -209,31 +282,179 @@ export default function MyMusic() {
         </div>
       )}
 
-      {/* Mobile Play Controls */}
+      {/* audio player with visualizer is implemented here  */}
+      {currentlyPlaying && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50">
+          <div className="max-w-7xl mx-auto">
+            {/* Visualizer */}
+            <div className="mb-4">
+              <AudioVisualizer audioRef={audioRef} />
+            </div>
+            <div className="flex items-center justify-between">
+              {/* Track Info */}
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
+                  {currentTrack?.coverImage ? (
+                    <img
+                      src={currentTrack.coverImage}
+                      alt={currentTrack.title}
+                      className="w-full h-full object-cover rounded"
+                    />
+                  ) : (
+                    <Music className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  <h4 className="text-white font-medium truncate max-w-[200px]">
+                    {currentTrack?.title}
+                  </h4>
+                  <p className="text-gray-400 text-sm truncate max-w-[200px]">
+                    {currentTrack?.artist}
+                  </p>
+                </div>
+              </div>
+
+              {/* player Controls */}
+              <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4">
+                <div className="flex items-center space-x-4">
+                  <button
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => {
+                      if (audioRef.current) {
+                        audioRef.current.currentTime = 0;
+                      }
+                    }}
+                  >
+                    <SkipBack size={20} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (audioRef.current) {
+                        if (isPlaying) {
+                          audioRef.current.pause();
+                        } else {
+                          audioRef.current
+                            .play()
+                            .catch((err) =>
+                              console.error("Error playing audio:", err)
+                            );
+                        }
+                      }
+                    }}
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
+                  >
+                    {isPlaying ? (
+                      <PauseCircle size={20} />
+                    ) : (
+                      <PlayCircle size={20} />
+                    )}
+                  </button>
+                  <button
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => {
+                     
+                    }}
+                  >
+                    <SkipBack size={20} className="rotate-180" />
+                  </button>
+                </div>
+                <div className="w-full flex items-center space-x-2">
+                  <span className="text-xs text-gray-400 w-10">
+                    {formatDuration(currentTime)}
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 0}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                  <span className="text-xs text-gray-400 w-10">
+                    {formatDuration(duration)}
+                  </span>
+                </div>
+              </div>
+
+  
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={toggleMute}
+                  className="text-gray-400 hover:text-white"
+                >
+                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+                <button
+                  onClick={() => {
+                    setCurrentlyPlaying(null);
+                    if (audioRef.current) {
+                      audioRef.current.pause();
+                      audioRef.current.src = "";
+                    }
+                  }}
+                  className="ml-4 text-gray-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
       {currentlyPlaying && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => {
-                  if (audioElement) {
-                    audioElement.pause();
+                  if (audioRef.current) {
+                    if (isPlaying) {
+                      audioRef.current.pause();
+                    } else {
+                      audioRef.current
+                        .play()
+                        .catch((err) =>
+                          console.error("Error playing audio:", err)
+                        );
+                    }
                   }
-                  setCurrentlyPlaying(null);
                 }}
                 className="text-purple-400"
               >
-                <PauseCircle className="h-8 w-8" />
+                {isPlaying ? (
+                  <PauseCircle className="h-8 w-8" />
+                ) : (
+                  <PlayCircle className="h-8 w-8" />
+                )}
               </button>
               <div>
-                <p className="text-white font-medium">
-                  {tracks.find(t => t._id === currentlyPlaying)?.title}
-                </p>
-                <p className="text-gray-400 text-sm">
-                  {tracks.find(t => t._id === currentlyPlaying)?.artist}
-                </p>
+                <p className="text-white font-medium">{currentTrack?.title}</p>
+                <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
               </div>
             </div>
+            <button
+              onClick={() => {
+                setCurrentlyPlaying(null);
+                if (audioRef.current) {
+                  audioRef.current.pause();
+                  audioRef.current.src = "";
+                }
+              }}
+              className="text-gray-400"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
         </div>
       )}
