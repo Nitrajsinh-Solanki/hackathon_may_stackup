@@ -1,9 +1,7 @@
 // moodify\src\app\dashboard\layout.tsx
 
 
-
 'use client';
-
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -12,7 +10,9 @@ import {
   Music,
   Library,
   User,
-  LogOut
+  LogOut,
+  ListMusic,
+  Headphones
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -62,6 +62,10 @@ export default function DashboardLayout({
       setActivePage('library');
     } else if (pathname.includes('/profile')) {
       setActivePage('profile');
+    } else if (pathname.includes('/playlists')) {
+      setActivePage('playlists');
+    } else if (pathname.includes('/podcasts')) {
+      setActivePage('podcasts');
     } else {
       setActivePage('home');
     }
@@ -90,6 +94,8 @@ export default function DashboardLayout({
     { id: 'home', label: 'Home', icon: <Home size={20} />, path: '/dashboard' },
     { id: 'upload', label: 'Upload Music', icon: <Upload size={20} />, path: '/dashboard/upload' },
     { id: 'my-music', label: 'My Music', icon: <Music size={20} />, path: '/dashboard/my-music' },
+    { id: 'playlists', label: 'Playlists', icon: <ListMusic size={20} />, path: '/dashboard/playlists' },
+    { id: 'podcasts', label: 'Podcasts', icon: <Headphones size={20} />, path: '/dashboard/podcasts' },
     { id: 'library', label: 'Library', icon: <Library size={20} />, path: '/dashboard/library' },
     { id: 'profile', label: 'Profile', icon: <User size={20} />, path: '/dashboard/profile' },
   ];
@@ -142,6 +148,8 @@ export default function DashboardLayout({
               {activePage === 'home' && 'Discover Music'}
               {activePage === 'upload' && 'Upload Music'}
               {activePage === 'my-music' && 'My Music'}
+              {activePage === 'playlists' && 'My Playlists'}
+              {activePage === 'podcasts' && 'Podcasts'}
               {activePage === 'library' && 'My Library'}
               {activePage === 'profile' && 'My Profile'}
             </h2>
