@@ -58,12 +58,13 @@ export default function DashboardLayout({
       setActivePage("library");
     } else if (pathname.includes("/profile")) {
       setActivePage("profile");
-    } else if (pathname.includes("/playlist-album")) {
+    } else if (pathname.includes("/playlist-album") || pathname.includes("/album/")) {
       setActivePage("playlist-album");
     } else {
       setActivePage("home");
     }
   }, [pathname]);
+  
 
   const handleLogout = async () => {
     try {

@@ -53,13 +53,22 @@ const handleApiError = (error: any, message: string): never => {
   throw new Error(message);
 };
 
-// Format duration from seconds to MM:SS
-export const formatDuration = (seconds: number | string): string => {
-  const secondsNum = typeof seconds === 'string' ? parseInt(seconds, 10) : seconds;
-  const minutes = Math.floor(secondsNum / 60);
-  const remainingSeconds = Math.floor(secondsNum % 60);
-  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+export const formatDuration = (milliseconds: number | string): string => {
+  const secondsNum = typeof milliseconds === 'string' 
+    ? parseInt(milliseconds, 10) / 1000 
+    : milliseconds / 1000;
+  
+  const hours = Math.floor(secondsNum / 3600);
+  const minutes = Math.floor((secondsNum % 3600) / 60);
+  const seconds = Math.floor(secondsNum % 60);
+  
+  const formattedHours = hours.toString().padStart(2, '0');
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedSeconds = seconds.toString().padStart(2, '0');
+  
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
+
 
 // Search for albums by artist name
 export const searchAlbumsByArtist = async (
