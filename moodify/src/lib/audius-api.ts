@@ -1,8 +1,7 @@
 // moodify\src\lib\audius-api.ts
 
 
-
-// Audius API utility functions
+// audiis API utility functions
 const AUDIUS_API_BASE_URL = 'https://discoveryprovider.audius.co/v1';
 
 export interface Track {

@@ -230,12 +230,10 @@ export default function MusicPlayer({ track, onClose, autoPlay = false }: MusicP
     <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50">
       <audio ref={audioRef} className="hidden" />
       <div className="max-w-7xl mx-auto">
-        {/* Visualizer */}
         <div className="mb-4">
           <AudioVisualizer audioRef={audioRef} />
         </div>
         <div className="flex items-center justify-between">
-          {/* Track Info */}
           <div className="flex items-center space-x-4">
             <img
               src={track.artwork["150x150"] || "/placeholder-album.png"}
@@ -257,7 +255,6 @@ export default function MusicPlayer({ track, onClose, autoPlay = false }: MusicP
               )}
             </div>
           </div>
-          {/* Player Controls */}
           <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4">
             <div className="flex items-center space-x-4">
               <button className="text-gray-400 hover:text-white">
@@ -290,7 +287,6 @@ export default function MusicPlayer({ track, onClose, autoPlay = false }: MusicP
               </span>
             </div>
           </div>
-          {/* Volume Controls */}
           <div className="flex items-center space-x-2">
             <button
               onClick={toggleMute}

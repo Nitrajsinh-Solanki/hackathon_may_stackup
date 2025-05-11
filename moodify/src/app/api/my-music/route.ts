@@ -1,4 +1,6 @@
-// moodify\src\app\api\my-music\route.ts
+// hackathon_may_stackup\moodify\src\app\api\my-music\route.ts
+
+
 
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
@@ -43,4 +45,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
