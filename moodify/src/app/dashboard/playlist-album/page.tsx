@@ -9,6 +9,7 @@ import {
   getFeaturedPlaylists,
   searchPlaylists,
   DeezerPlaylist,
+  LOAD_MORE_LIMIT
 } from '@/lib/deezer-api';
 import {
   searchAlbumsByArtist,
@@ -27,6 +28,9 @@ export default function PlaylistAlbumPage() {
   const [albums, setAlbums] = useState<AudioDBAlbum[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [playlistsIndex, setPlaylistsIndex] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMorePlaylists, setHasMorePlaylists] = useState(true);
 
   // load featured playlists or popular albums on initial load
   useEffect(() => {
@@ -34,10 +38,12 @@ export default function PlaylistAlbumPage() {
       try {
         setIsLoading(true);
         setError(null);
-        
+                
         if (activeTab === 'playlists') {
           const featuredPlaylists = await getFeaturedPlaylists();
           setPlaylists(featuredPlaylists);
+          setPlaylistsIndex(featuredPlaylists.length);
+          setHasMorePlaylists(true);
         } else {
           const popularAlbums = await getPopularAlbums();
           setAlbums(popularAlbums);
@@ -60,12 +66,13 @@ export default function PlaylistAlbumPage() {
     try {
       setIsSearching(true);
       setError(null);
-      
+        
       if (activeTab === 'playlists') {
         const results = await searchPlaylists(searchQuery);
         setPlaylists(results.data || []);
+        setPlaylistsIndex(results.data?.length || 0);
+        setHasMorePlaylists(results.data?.length >= DEFAULT_LIMIT);
       } else {
-        // for albums, we search by artist name with TheAudioDB
         const results = await searchAlbumsByArtist(searchQuery);
         setAlbums(results || []);
       }
@@ -74,6 +81,8 @@ export default function PlaylistAlbumPage() {
       setError(`Failed to search ${activeTab}`);
       if (activeTab === 'playlists') {
         setPlaylists([]);
+        setPlaylistsIndex(0);
+        setHasMorePlaylists(false);
       } else {
         setAlbums([]);
       }
@@ -83,17 +92,19 @@ export default function PlaylistAlbumPage() {
   };
 
   const handleTabChange = (tab: 'playlists' | 'albums') => {
-    if (tab === activeTab) return; 
-    
+    if (tab === activeTab) return;
+       
     setActiveTab(tab);
     setSearchQuery('');
     setError(null);
     setIsLoading(true);
-    
+      
     if (tab === 'playlists') {
       getFeaturedPlaylists()
         .then(data => {
           setPlaylists(data);
+          setPlaylistsIndex(data.length);
+          setHasMorePlaylists(true);
           setIsLoading(false);
         })
         .catch(err => {
@@ -115,14 +126,48 @@ export default function PlaylistAlbumPage() {
     }
   };
 
+  const handleLoadMorePlaylists = async () => {
+    if (isLoadingMore || !hasMorePlaylists) return;
+    
+    try {
+      setIsLoadingMore(true);
+        
+      if (searchQuery) {
+        // Load more search results
+        const results = await searchPlaylists(searchQuery, LOAD_MORE_LIMIT, playlistsIndex);
+        if (results.data && results.data.length > 0) {
+          setPlaylists(prev => [...prev, ...results.data]);
+          setPlaylistsIndex(prev => prev + results.data.length);
+          setHasMorePlaylists(results.data.length >= LOAD_MORE_LIMIT);
+        } else {
+          setHasMorePlaylists(false);
+        }
+      } else {
+        const morePlaylists = await getFeaturedPlaylists(LOAD_MORE_LIMIT, playlistsIndex);
+        if (morePlaylists && morePlaylists.length > 0) {
+          setPlaylists(prev => [...prev, ...morePlaylists]);
+          setPlaylistsIndex(prev => prev + morePlaylists.length);
+          setHasMorePlaylists(morePlaylists.length >= LOAD_MORE_LIMIT);
+        } else {
+          setHasMorePlaylists(false);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading more playlists:', err);
+      setError('Failed to load more playlists');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   return (
     <div className="container mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Playlists & Albums</h1>
         <p className="text-gray-400">Discover and search for playlists and albums</p>
       </div>
-      
-            <div className="flex border-b border-gray-700 mb-6">
+            
+      <div className="flex border-b border-gray-700 mb-6">
         <button
           className={`py-3 px-6 font-medium flex items-center ${
             activeTab === 'playlists'
@@ -146,14 +191,14 @@ export default function PlaylistAlbumPage() {
           Albums
         </button>
       </div>
-      
-      {/* Search Form */}
+        
+      {/* search Form */}
       <form onSubmit={handleSearch} className="mb-8">
         <div className="relative">
           <input
             type="text"
             placeholder={activeTab === 'playlists' 
-              ? 'Search playlists...' 
+              ? 'Search playlists...'
               : 'Search albums by artist name...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -171,13 +216,13 @@ export default function PlaylistAlbumPage() {
           </button>
         </div>
       </form>
-      
+        
       {error && (
         <div className="bg-red-900/20 border border-red-900 text-red-300 px-4 py-3 rounded-lg mb-6">
           {error}
         </div>
       )}
-      
+        
       {/* content will be shown by this*/}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
@@ -195,15 +240,37 @@ export default function PlaylistAlbumPage() {
                   {searchQuery ? 'No playlists found for your search.' : 'No featured playlists available.'}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {playlists.map((playlist) => (
-                    <PlaylistCard key={playlist.id} playlist={playlist} />
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {playlists.map((playlist) => (
+                      <PlaylistCard key={playlist.id} playlist={playlist} />
+                    ))}
+                  </div>
+                  
+                  {/*load More Button - Always show when in playlists tab */}
+                  {activeTab === 'playlists' && (
+                    <div className="flex justify-center mt-8 mb-12">
+                      <button
+                        onClick={handleLoadMorePlaylists}
+                        disabled={isLoadingMore}
+                        className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-full flex items-center disabled:bg-purple-800 disabled:text-gray-300 text-lg"
+                      >
+                        {isLoadingMore ? (
+                          <>
+                            <Loader size={20} className="animate-spin mr-2" />
+                            Loading...
+                          </>
+                        ) : (
+                          'Load More'
+                        )}
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </>
           )}
-          
+            
           {activeTab === 'albums' && (
             <>
               <h2 className="text-xl font-semibold text-white mb-4">
@@ -229,5 +296,3 @@ export default function PlaylistAlbumPage() {
     </div>
   );
 }
-
-

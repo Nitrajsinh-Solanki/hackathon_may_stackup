@@ -106,8 +106,8 @@ export interface DeezerSearchResult<T> {
   next?: string;
 }
 
-export const DEFAULT_LIMIT = 25;
-export const LOAD_MORE_LIMIT = 25;
+export const DEFAULT_LIMIT = 52;
+export const LOAD_MORE_LIMIT = 10;
 
 const handleApiError = (error: any, message: string): never => {
   console.error(`${message}:`, error);
@@ -167,21 +167,25 @@ export const searchPlaylists = async (
 };
 
 export const getFeaturedPlaylists = async (
-  limit: number = DEFAULT_LIMIT): Promise<DeezerPlaylist[]> => {
+  limit: number = DEFAULT_LIMIT,
+  index: number = 0
+): Promise<DeezerPlaylist[]> => {
   try {
-    const res = await fetch(`/api/deezer/featured-playlists?limit=${limit}`);
+    const res = await fetch(`/api/deezer/featured-playlists?limit=${limit}&index=${index}`);
     
     if (!res.ok) {
       throw new Error(`Failed to fetch featured playlists (Status: ${res.status})`);
     }
     
     const data = await res.json();
+    console.log("Featured playlists data:", data); 
     return data.data || [];
   } catch (error) {
     console.error('Failed to fetch featured playlists:', error);
-    return []; 
+    return [];
   }
 };
+
 
 export const searchAlbums = async (
   query: string,
