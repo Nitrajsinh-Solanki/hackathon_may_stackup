@@ -32,6 +32,7 @@ export default function DashboardLayout({
       try {
         const response = await fetch("/api/auth/me", {
           method: "GET",
+          credentials:"include"
         });
         if (!response.ok) {
           throw new Error("Not authenticated");
@@ -58,7 +59,7 @@ export default function DashboardLayout({
       setActivePage("library");
     } else if (pathname.includes("/profile")) {
       setActivePage("profile");
-    } else if (pathname.includes("/playlist-album") || pathname.includes("/album/")) {
+    } else if (pathname.includes("/playlist-album") || pathname.includes("/album/")|| pathname.includes("/playlist/")) {
       setActivePage("playlist-album");
     } else {
       setActivePage("home");

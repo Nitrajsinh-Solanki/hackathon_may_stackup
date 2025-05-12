@@ -1,4 +1,6 @@
-// moodify\src\app\dashboard\my-music\page.tsx
+// hackathon_may_stackup\moodify\src\app\dashboard\my-music\page.tsx
+
+
 
 "use client";
 import { useState, useEffect, useRef } from "react";
@@ -12,6 +14,7 @@ import {
   Volume2,
   VolumeX,
   X,
+  Trash2,
 } from "lucide-react";
 import AudioVisualizer from "@/app/components/AudioVisualizer";
 
@@ -39,6 +42,38 @@ export default function MyMusic() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+
+  const handleDelete = async (trackId: string) => {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this track? This action cannot be undone."
+      )
+    ) {
+      try {
+        setIsDeleting(trackId);
+        const response = await fetch(`/api/my-music/${trackId}`, {
+          method: "DELETE",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to delete track");
+        }
+        setTracks(tracks.filter((track) => track._id !== trackId));
+        if (currentlyPlaying === trackId) {
+          setCurrentlyPlaying(null);
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = "";
+          }
+        }
+      } catch (err) {
+        console.error("Error deleting track:", err);
+        setError(err instanceof Error ? err.message : "Failed to delete track");
+      } finally {
+        setIsDeleting(null);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchTracks = async () => {
@@ -64,7 +99,6 @@ export default function MyMusic() {
     };
 
     fetchTracks();
-
     // initializng the  audio element
     const audio = new Audio();
     audioRef.current = audio;
@@ -84,8 +118,6 @@ export default function MyMusic() {
     audio.addEventListener("pause", () => {
       setIsPlaying(false);
     });
-
-    // clean up  audio on unmount
     return () => {
       if (audio) {
         audio.pause();
@@ -217,11 +249,12 @@ export default function MyMusic() {
       ) : (
         <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 text-gray-400 text-sm font-medium">
-            <div className="col-span-6 md:col-span-5">Track</div>
+            <div className="col-span-6 md:col-span-4">Track</div>
             <div className="hidden md:block md:col-span-2">Duration</div>
             <div className="col-span-3 md:col-span-2">Genre</div>
             <div className="col-span-3 md:col-span-2">Uploaded</div>
             <div className="hidden md:block md:col-span-1">Play</div>
+            <div className="hidden md:block md:col-span-1">Delete</div>
           </div>
           <div className="divide-y divide-gray-700">
             {tracks.map((track) => (
@@ -229,7 +262,7 @@ export default function MyMusic() {
                 key={track._id}
                 className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-700/50 transition-colors items-center"
               >
-                <div className="col-span-6 md:col-span-5 flex items-center space-x-3">
+                <div className="col-span-6 md:col-span-4 flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                     {track.coverImage ? (
                       <img
@@ -276,22 +309,38 @@ export default function MyMusic() {
                     )}
                   </button>
                 </div>
+                <div className="hidden md:flex md:col-span-1 justify-center">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(track._id);
+                    }}
+                    className="text-gray-400 hover:text-red-400 transition-colors"
+                    aria-label="Delete track"
+                    disabled={isDeleting === track._id}
+                  >
+                    {isDeleting === track._id ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-5 w-5" />
+                    )}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
-
       {/* audio player with visualizer is implemented here  */}
       {currentlyPlaying && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50">
           <div className="max-w-7xl mx-auto">
-            {/* Visualizer */}
+            {/* visualizer is implemented here  */}
             <div className="mb-4">
               <AudioVisualizer audioRef={audioRef} />
             </div>
             <div className="flex items-center justify-between">
-              {/* Track Info */}
+              {/* track  Info */}
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                   {currentTrack?.coverImage ? (
@@ -313,7 +362,6 @@ export default function MyMusic() {
                   </p>
                 </div>
               </div>
-
               {/* player Controls */}
               <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4">
                 <div className="flex items-center space-x-4">
@@ -334,130 +382,125 @@ export default function MyMusic() {
                           audioRef.current.pause();
                         } else {
                           audioRef.current
-                            .play()
-                            .catch((err) =>
-                              console.error("Error playing audio:", err)
-                            );
-                        }
+                          .play()
+                          .catch((err) =>
+                            console.error("Error playing audio:", err)
+                          );
                       }
-                    }}
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
-                  >
-                    {isPlaying ? (
-                      <PauseCircle size={20} />
-                    ) : (
-                      <PlayCircle size={20} />
-                    )}
-                  </button>
-                  <button
-                    className="text-gray-400 hover:text-white"
-                    onClick={() => {
-                     
-                    }}
-                  >
-                    <SkipBack size={20} className="rotate-180" />
-                  </button>
-                </div>
-                <div className="w-full flex items-center space-x-2">
-                  <span className="text-xs text-gray-400 w-10">
-                    {formatDuration(currentTime)}
-                  </span>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || 0}
-                    value={currentTime}
-                    onChange={handleSeek}
-                    className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
-                  />
-                  <span className="text-xs text-gray-400 w-10">
-                    {formatDuration(duration)}
-                  </span>
-                </div>
-              </div>
-
-  
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={toggleMute}
-                  className="text-gray-400 hover:text-white"
+                    }
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
                 >
-                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                  {isPlaying ? (
+                    <PauseCircle size={20} />
+                  ) : (
+                    <PlayCircle size={20} />
+                  )}
                 </button>
+                <button
+                  className="text-gray-400 hover:text-white"
+                  onClick={() => {}}
+                >
+                  <SkipBack size={20} className="rotate-180" />
+                </button>
+              </div>
+              <div className="w-full flex items-center space-x-2">
+                <span className="text-xs text-gray-400 w-10">
+                  {formatDuration(currentTime)}
+                </span>
                 <input
                   type="range"
                   min="0"
-                  max="1"
-                  step="0.01"
-                  value={isMuted ? 0 : volume}
-                  onChange={handleVolumeChange}
-                  className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  max={duration || 0}
+                  value={currentTime}
+                  onChange={handleSeek}
+                  className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
                 />
-                <button
-                  onClick={() => {
-                    setCurrentlyPlaying(null);
-                    if (audioRef.current) {
-                      audioRef.current.pause();
-                      audioRef.current.src = "";
-                    }
-                  }}
-                  className="ml-4 text-gray-400 hover:text-white"
-                >
-                  <X size={20} />
-                </button>
+                <span className="text-xs text-gray-400 w-10">
+                  {formatDuration(duration)}
+                </span>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-
-      
-      {currentlyPlaying && (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={toggleMute}
+                className="text-gray-400 hover:text-white"
+              >
+                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+              />
               <button
                 onClick={() => {
+                  setCurrentlyPlaying(null);
                   if (audioRef.current) {
-                    if (isPlaying) {
-                      audioRef.current.pause();
-                    } else {
-                      audioRef.current
-                        .play()
-                        .catch((err) =>
-                          console.error("Error playing audio:", err)
-                        );
-                    }
+                    audioRef.current.pause();
+                    audioRef.current.src = "";
                   }
                 }}
-                className="text-purple-400"
+                className="ml-4 text-gray-400 hover:text-white"
               >
-                {isPlaying ? (
-                  <PauseCircle className="h-8 w-8" />
-                ) : (
-                  <PlayCircle className="h-8 w-8" />
-                )}
+                <X size={20} />
               </button>
-              <div>
-                <p className="text-white font-medium">{currentTrack?.title}</p>
-                <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
-              </div>
             </div>
-            <button
-              onClick={() => {
-                setCurrentlyPlaying(null);
-                if (audioRef.current) {
-                  audioRef.current.pause();
-                  audioRef.current.src = "";
-                }
-              }}
-              className="text-gray-400"
-            >
-              <X className="h-6 w-6" />
-            </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </div>
+    )}
+    {currentlyPlaying && (
+      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={() => {
+                if (audioRef.current) {
+                  if (isPlaying) {
+                    audioRef.current.pause();
+                  } else {
+                    audioRef.current
+                      .play()
+                      .catch((err) =>
+                        console.error("Error playing audio:", err)
+                      );
+                  }
+                }
+              }}
+              className="text-purple-400"
+            >
+              {isPlaying ? (
+                <PauseCircle className="h-8 w-8" />
+              ) : (
+                <PlayCircle className="h-8 w-8" />
+              )}
+            </button>
+            <div>
+              <p className="text-white font-medium">{currentTrack?.title}</p>
+              <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              setCurrentlyPlaying(null);
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = "";
+              }
+            }}
+            className="text-gray-400"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
 }
+

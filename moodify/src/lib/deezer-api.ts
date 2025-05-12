@@ -123,13 +123,14 @@ export const formatDuration = (seconds: number): string => {
 // fetching a playlist by ID
 export const fetchPlaylist = async (id: string): Promise<DeezerPlaylist> => {
   try {
-    const res = await fetch(`${DEEZER_API}/playlist/${id}`);
+    const res = await fetch(`/api/deezer/playlist/${id}`);
     if (!res.ok) throw new Error(`Failed to fetch playlist (Status: ${res.status})`);
     return await res.json();
   } catch (error) {
     return handleApiError(error, 'Failed to fetch playlist');
   }
 };
+
 
 // fetching playlist tracks
 export const fetchPlaylistTracks = async (id: string): Promise<DeezerTrack[]> => {
