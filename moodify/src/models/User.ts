@@ -14,12 +14,24 @@ export interface UploadedTrack {
   uploadedAt: Date;
 }
 
+export interface LikedTrack {
+  trackId: string;
+  title: string;
+  artist: string;
+  artwork: string;
+  duration: number;
+  genre?: string;
+  mood?: string;
+  likedAt: Date;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
   password: string;
   isVerified: boolean;
   uploadedTracks: UploadedTrack[];
+  likedTracks: LikedTrack[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -58,6 +70,39 @@ const uploadedTrackSchema = new mongoose.Schema({
   },
 });
 
+const likedTrackSchema = new mongoose.Schema({
+  trackId: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  artist: {
+    type: String,
+    required: true,
+  },
+  artwork: {
+    type: String,
+    required: true,
+  },
+  duration: {
+    type: Number,
+    required: true,
+  },
+  genre: {
+    type: String,
+  },
+  mood: {
+    type: String,
+  },
+  likedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -84,6 +129,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     uploadedTracks: [uploadedTrackSchema],
+    likedTracks: [likedTrackSchema],
   },
   {
     timestamps: true,
@@ -92,7 +138,6 @@ const userSchema = new mongoose.Schema(
 
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

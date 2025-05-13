@@ -1,0 +1,298 @@
+// hackathon_may_stackup\moodify\src\app\components\LikedMusicList.tsx
+
+
+
+"use client";
+import { useState, useEffect, useRef } from "react";
+import { Play, Heart, Clock } from "lucide-react";
+import MusicPlayer from "@/app/components/MusicPlayer";
+
+interface LikedTrack {
+  trackId: string;
+  title: string;
+  artist: string;
+  artwork: string;
+  duration: number;
+  genre?: string;
+  mood?: string;
+  likedAt: string;
+}
+
+export default function LikedMusicList() {
+  const [likedTracks, setLikedTracks] = useState<LikedTrack[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<any | null>(null);
+  const [showPlayer, setShowPlayer] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(-1);
+  const [playerKey, setPlayerKey] = useState(0); // Add a key to force remount
+  const [userInteracted, setUserInteracted] = useState(false);
+  const playerRef = useRef<{ playTrack: () => void } | null>(null);
+
+  useEffect(() => {
+    const fetchLikedTracks = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/my-music/liked-tracks");
+        if (!response.ok) {
+          throw new Error("Failed to fetch liked tracks");
+        }
+        const data = await response.json();
+        setLikedTracks(data.likedTracks || []);
+      } catch (err) {
+        console.error("Error fetching liked tracks:", err);
+        setError("Failed to load your liked music. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLikedTracks();
+
+    // setting user interaction flag when user interacts with the page
+    const handleInteraction = () => {
+      setUserInteracted(true);
+    };
+
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('keydown', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('keydown', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+  }, []);
+
+const handlePlay = (track: LikedTrack, index: number) => {
+  setUserInteracted(true);
+  
+  if (showPlayer) {
+    setPlayerKey(prevKey => prevKey + 1);
+  }
+    const playerTrack = {
+    id: track.trackId,
+    title: track.title,
+    user: {
+      name: track.artist
+    },
+    artwork: {
+      "150x150": track.artwork,
+      "480x480": track.artwork,
+      "1000x1000": track.artwork
+    },
+    duration: track.duration,
+    genre: track.genre || "",
+    mood: track.mood || "",
+    play_count: 0 
+  };
+      
+  setCurrentTrack(playerTrack);
+  setCurrentTrackIndex(index);
+  setShowPlayer(true);
+      
+  setTimeout(() => {
+    if (playerRef.current && playerRef.current.playTrack) {
+      playerRef.current.playTrack();
+    }
+  }, 300); 
+};
+
+
+  const handleUnlike = async (trackId: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    try {
+      // sending request to unlike the track
+      const response = await fetch(`/api/tracks/${trackId}/like`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to unlike track');
+      }
+      
+      // removing the track from the local state
+      setLikedTracks(prev => prev.filter(track => track.trackId !== trackId));
+    } catch (error) {
+      console.error("Error unliking track:", error);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentTrackIndex > 0) {
+      const prevIndex = currentTrackIndex - 1;
+      const prevTrack = likedTracks[prevIndex];
+      handlePlay(prevTrack, prevIndex);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentTrackIndex < likedTracks.length - 1) {
+      const nextIndex = currentTrackIndex + 1;
+      const nextTrack = likedTracks[nextIndex];
+      
+      setPlayerKey(prevKey => prevKey + 1);
+      
+      const playerTrack = {
+        id: nextTrack.trackId,
+        title: nextTrack.title,
+        user: {
+          name: nextTrack.artist
+        },
+        artwork: {
+          "150x150": nextTrack.artwork,
+          "480x480": nextTrack.artwork,
+          "1000x1000": nextTrack.artwork
+        },
+        duration: nextTrack.duration,
+        genre: nextTrack.genre || "",
+        mood: nextTrack.mood || "",
+        play_count: 0
+      };
+      
+      setCurrentTrack(playerTrack);
+      setCurrentTrackIndex(nextIndex);
+      setShowPlayer(true);
+      
+      setTimeout(() => {
+        if (playerRef.current && playerRef.current.playTrack) {
+          playerRef.current.playTrack();
+        }
+      }, 300);
+    }
+  };
+  
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-900/20 border border-red-800 rounded-lg p-4 text-center">
+        <p className="text-red-300">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 text-sm text-white bg-red-800 hover:bg-red-700 px-4 py-2 rounded-md"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (likedTracks.length === 0) {
+    return (
+      <div className="bg-gray-800/50 rounded-lg p-8 text-center">
+        <p className="text-gray-400">You haven't liked any music yet</p>
+        <p className="text-gray-500 mt-2">
+          Explore the discovery page and like some tracks to see them here
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="bg-gray-800/30 rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto">
+            <thead className="bg-gray-800/60 text-left">
+              <tr>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">#</th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">Title</th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">Artist</th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">
+                  <Clock size={16} />
+                </th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">Genre</th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm">Mood</th>
+                <th className="px-4 py-3 text-gray-400 font-medium text-sm"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {likedTracks.map((track, index) => (
+                <tr 
+                  key={track.trackId}
+                  className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors cursor-pointer"
+                  onClick={() => handlePlay(track, index)}
+                >
+                  <td className="px-4 py-3 text-gray-400">{index + 1}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative w-10 h-10 flex-shrink-0">
+                        <img
+                          src={track.artwork || "/placeholder-album.png"}
+                          alt={track.title}
+                          className="w-10 h-10 rounded object-cover"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity rounded">
+                          <Play size={18} className="text-white" fill="white" />
+                        </div>
+                      </div>
+                      <span className="text-white font-medium truncate max-w-[200px]">
+                        {track.title}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-gray-300">{track.artist}</td>
+                  <td className="px-4 py-3 text-gray-400">
+                    {formatTime(track.duration)}
+                  </td>
+                  <td className="px-4 py-3">
+                    {track.genre && (
+                      <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full">
+                        {track.genre}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {track.mood && (
+                      <span className="bg-gray-700 text-gray-300 text-xs px-2 py-1 rounded-full">
+                        {track.mood}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={(e) => handleUnlike(track.trackId, e)}
+                      className="text-red-400 hover:text-red-300 transition-colors"
+                      aria-label="Unlike"
+                    >
+                      <Heart size={18} fill="currentColor" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {showPlayer && currentTrack && (
+        <MusicPlayer
+          key={playerKey}
+          ref={playerRef}
+          track={currentTrack}
+          onClose={() => setShowPlayer(false)}
+          autoPlay={true}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          hasPrevious={currentTrackIndex > 0}
+          hasNext={currentTrackIndex < likedTracks.length - 1}
+          userInteracted={userInteracted}
+        />
+      )}
+    </div>
+  );
+}

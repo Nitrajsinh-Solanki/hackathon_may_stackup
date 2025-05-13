@@ -6,6 +6,7 @@
 
 import { useState } from "react";
 import { Heart, ListMusic, Disc, PlusCircle } from "lucide-react";
+import LikedMusicList from "@/app/components/LikedMusicList";
 
 export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState("liked");
@@ -40,14 +41,12 @@ export default function LibraryPage() {
         </div>
       </div>
 
-      {/* Content Area */}
+      {/* content Area */}
       <div className="mt-6">
         {activeTab === "liked" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Liked Music</h2>
-            <div className="bg-gray-800/50 rounded-lg p-8 text-center">
-              <p className="text-gray-400">Your liked music will appear here</p>
-            </div>
+            <LikedMusicList />
           </div>
         )}
 

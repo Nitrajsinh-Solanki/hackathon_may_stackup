@@ -1,8 +1,7 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\my-music\page.tsx
 
-
-
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -17,6 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import AudioVisualizer from "@/app/components/AudioVisualizer";
+import LikeButton from "@/app/components/LikeButton";
 
 interface UploadedTrack {
   _id: string;
@@ -118,6 +118,7 @@ export default function MyMusic() {
     audio.addEventListener("pause", () => {
       setIsPlaying(false);
     });
+
     return () => {
       if (audio) {
         audio.pause();
@@ -147,25 +148,54 @@ export default function MyMusic() {
 
   const handlePlay = (trackId: string, url: string) => {
     if (!audioRef.current) return;
+    
+    setError(null);
+    
     if (currentlyPlaying === trackId) {
-      // toggling play/pause for current track
       if (isPlaying) {
         audioRef.current.pause();
       } else {
         audioRef.current
           .play()
-          .catch((err) => console.error("Error playing audio:", err));
+          .catch((err) => {
+            console.error("Error playing audio:", err);
+            setError("Failed to play audio. Please check if the file format is supported.");
+          });
       }
     } else {
+      console.log("Attempting to play track from URL:", url);
+      
+      const handleAudioError = () => {
+        console.error("Audio error event triggered:", audioRef.current?.error);
+        setError("Failed to load audio. The file may be missing or in an unsupported format.");
+      };
+      
+      audioRef.current.addEventListener("error", handleAudioError);
+      
       audioRef.current.src = url;
       audioRef.current.crossOrigin = "anonymous";
       audioRef.current.volume = isMuted ? 0 : volume;
-      audioRef.current
-        .play()
-        .catch((err) => console.error("Error playing audio:", err));
+      
+      audioRef.current.load();
+      
+      setTimeout(() => {
+        if (audioRef.current) {
+          audioRef.current
+            .play()
+            .then(() => {
+              console.log("Audio playing successfully");
+            })
+            .catch((err) => {
+              console.error("Error playing audio after load:", err);
+              setError("Failed to play audio. Please try another track or check your connection.");
+            });
+        }
+      }, 300);
+      
       setCurrentlyPlaying(trackId);
     }
   };
+  
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const seekTime = parseFloat(e.target.value);
@@ -254,6 +284,7 @@ export default function MyMusic() {
             <div className="col-span-3 md:col-span-2">Genre</div>
             <div className="col-span-3 md:col-span-2">Uploaded</div>
             <div className="hidden md:block md:col-span-1">Play</div>
+            <div className="hidden md:block md:col-span-1">Like</div>
             <div className="hidden md:block md:col-span-1">Delete</div>
           </div>
           <div className="divide-y divide-gray-700">
@@ -308,6 +339,17 @@ export default function MyMusic() {
                       <PlayCircle className="h-6 w-6" />
                     )}
                   </button>
+                </div>
+                <div className="hidden md:flex md:col-span-1 justify-center">
+                  <LikeButton
+                    trackId={track._id}
+                    title={track.title}
+                    artist={track.artist || "Unknown Artist"}
+                    artwork={track.coverImage || "/placeholder-album.png"}
+                    duration={track.duration}
+                    genre={track.genre}
+                    mood={track.mood}
+                  />
                 </div>
                 <div className="hidden md:flex md:col-span-1 justify-center">
                   <button
@@ -382,61 +424,122 @@ export default function MyMusic() {
                           audioRef.current.pause();
                         } else {
                           audioRef.current
-                          .play()
-                          .catch((err) =>
-                            console.error("Error playing audio:", err)
-                          );
+                            .play()
+                            .catch((err) =>
+                              console.error("Error playing audio:", err)
+                            );
+                        }
                       }
-                    }
-                  }}
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
-                >
-                  {isPlaying ? (
-                    <PauseCircle size={20} />
-                  ) : (
-                    <PlayCircle size={20} />
-                  )}
-                </button>
-                <button
-                  className="text-gray-400 hover:text-white"
-                  onClick={() => {}}
-                >
-                  <SkipBack size={20} className="rotate-180" />
-                </button>
+                    }}
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2"
+                  >
+                    {isPlaying ? (
+                      <PauseCircle size={20} />
+                    ) : (
+                      <PlayCircle size={20} />
+                    )}
+                  </button>
+                  <button
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => {}}
+                  >
+                    <SkipBack size={20} className="rotate-180" />
+                  </button>
+                </div>
+                <div className="w-full flex items-center space-x-2">
+                  <span className="text-xs text-gray-400 w-10">
+                    {formatDuration(currentTime)}
+                  </span>
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 0}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                  <span className="text-xs text-gray-400 w-10">
+                    {formatDuration(duration)}
+                  </span>
+                </div>
               </div>
-              <div className="w-full flex items-center space-x-2">
-                <span className="text-xs text-gray-400 w-10">
-                  {formatDuration(currentTime)}
-                </span>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={toggleMute}
+                  className="text-gray-400 hover:text-white"
+                >
+                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                </button>
                 <input
                   type="range"
                   min="0"
-                  max={duration || 0}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
                 />
-                <span className="text-xs text-gray-400 w-10">
-                  {formatDuration(duration)}
-                </span>
+                <button
+                  onClick={() => {
+                    setCurrentlyPlaying(null);
+                    if (audioRef.current) {
+                      audioRef.current.pause();
+                      audioRef.current.src = "";
+                    }
+                  }}
+                  className="ml-4 text-gray-400 hover:text-white"
+                >
+                  <X size={20} />
+                </button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+          </div>
+        </div>
+      )}
+      {currentlyPlaying && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
               <button
-                onClick={toggleMute}
-                className="text-gray-400 hover:text-white"
+                onClick={() => {
+                  if (audioRef.current) {
+                    if (isPlaying) {
+                      audioRef.current.pause();
+                    } else {
+                      audioRef.current
+                        .play()
+                        .catch((err) =>
+                          console.error("Error playing audio:", err)
+                        );
+                    }
+                  }
+                }}
+                className="text-purple-400"
               >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                {isPlaying ? (
+                  <PauseCircle className="h-8 w-8" />
+                ) : (
+                  <PlayCircle className="h-8 w-8" />
+                )}
               </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={isMuted ? 0 : volume}
-                onChange={handleVolumeChange}
-                className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
-              />
+              <div>
+                <p className="text-white font-medium">{currentTrack?.title}</p>
+                <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              {/* Add like button here */}
+              {currentTrack && (
+                <LikeButton
+                  trackId={currentTrack._id}
+                  title={currentTrack.title}
+                  artist={currentTrack.artist || "Unknown Artist"}
+                  artwork={currentTrack.coverImage || "/placeholder-album.png"}
+                  duration={currentTrack.duration}
+                  genre={currentTrack.genre}
+                  mood={currentTrack.mood}
+                />
+              )}
               <button
                 onClick={() => {
                   setCurrentlyPlaying(null);
@@ -445,62 +548,14 @@ export default function MyMusic() {
                     audioRef.current.src = "";
                   }
                 }}
-                className="ml-4 text-gray-400 hover:text-white"
+                className="text-gray-400"
               >
-                <X size={20} />
+                <X className="h-6 w-6" />
               </button>
             </div>
           </div>
         </div>
-      </div>
-    )}
-    {currentlyPlaying && (
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={() => {
-                if (audioRef.current) {
-                  if (isPlaying) {
-                    audioRef.current.pause();
-                  } else {
-                    audioRef.current
-                      .play()
-                      .catch((err) =>
-                        console.error("Error playing audio:", err)
-                      );
-                  }
-                }
-              }}
-              className="text-purple-400"
-            >
-              {isPlaying ? (
-                <PauseCircle className="h-8 w-8" />
-              ) : (
-                <PlayCircle className="h-8 w-8" />
-              )}
-            </button>
-            <div>
-              <p className="text-white font-medium">{currentTrack?.title}</p>
-              <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              setCurrentlyPlaying(null);
-              if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.src = "";
-              }
-            }}
-            className="text-gray-400"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 }
-

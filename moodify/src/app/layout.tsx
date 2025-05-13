@@ -1,16 +1,16 @@
 // moodify\src\app\layout.tsx
 
+import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { LikedTracksProvider } from "./context/LikedTracksContext";
 
-
-import './globals.css';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Moodify - Music for Every Mood',
-  description: 'Discover music that matches your mood and create personalized playlists',
+  title: "Moodify - Music for Every Mood",
+  description:
+    "Discover music that matches your mood and create personalized playlists",
 };
 
 export default function RootLayout({
@@ -20,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <LikedTracksProvider>{children}</LikedTracksProvider>
+      </body>
     </html>
   );
 }
