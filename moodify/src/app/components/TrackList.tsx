@@ -1,11 +1,12 @@
 // hackathon_may_stackup\moodify\src\app\components\TrackList.tsx
 
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Play, Pause, Clock, Music, Loader } from 'lucide-react';
+import { Play, Pause, Music, Loader } from 'lucide-react';
 import { DeezerTrack, formatDuration } from '@/lib/deezer-api';
 
 interface TrackListProps {
@@ -14,28 +15,25 @@ interface TrackListProps {
   onTrackPlay?: (trackId: number) => void;
   isLoading?: boolean;
   loadingTrackId?: number | null;
-  currentlyPlayingId?: number | null; 
+  currentlyPlayingId?: number | null;
 }
 
-export default function TrackList({ 
-  tracks, 
+export default function TrackList({
+  tracks,
   playableTracks,
   onTrackPlay,
   isLoading = false,
   loadingTrackId = null,
-  currentlyPlayingId = null 
+  currentlyPlayingId = null
 }: TrackListProps) {
   const [hoveredTrack, setHoveredTrack] = useState<number | null>(null);
-  
-  // remove the local currentTrack state and use the prop instead
-  
+
   const handlePlayTrack = (trackId: number) => {
     if (onTrackPlay) {
       onTrackPlay(trackId);
     }
   };
 
-  // A track is potentially playable if it has a Deezer preview
   const isPotentiallyPlayable = (trackId: number) => {
     const track = tracks.find(t => t.id === trackId);
     return !!track?.preview;
@@ -43,15 +41,12 @@ export default function TrackList({
 
   return (
     <div className="bg-gray-900/50 rounded-lg overflow-hidden shadow-xl border border-gray-800/50">
-      <div className="grid grid-cols-12 px-4 py-3 border-b border-gray-800 text-gray-300 text-sm font-medium bg-gray-800/30">
+      <div className="grid grid-cols-11 px-4 py-3 border-b border-gray-800 text-gray-300 text-sm font-medium bg-gray-800/30">
         <div className="col-span-1">#</div>
         <div className="col-span-6">Title</div>
         <div className="col-span-4">Album</div>
-        <div className="col-span-1 flex justify-end">
-          <Clock size={16} />
-        </div>
       </div>
-      
+
       {isLoading ? (
         <div className="py-20 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
@@ -66,13 +61,13 @@ export default function TrackList({
         tracks.map((track, index) => {
           const isPlayable = isPotentiallyPlayable(track.id);
           const isLoading = loadingTrackId === track.id;
-          const isActive = currentlyPlayingId === track.id; 
+          const isActive = currentlyPlayingId === track.id;
           const isHovered = hoveredTrack === track.id;
-          
+
           return (
             <div
               key={track.id}
-              className={`grid grid-cols-12 px-4 py-3 items-center transition-colors duration-200
+              className={`grid grid-cols-11 px-4 py-3 items-center transition-colors duration-200
                 ${isActive ? 'bg-purple-900/20 border-l-4 border-purple-500' : 'border-l-4 border-transparent hover:bg-gray-800/50'}
                 ${!isPlayable ? 'opacity-60' : ''}
               `}
@@ -85,7 +80,7 @@ export default function TrackList({
                 ) : isHovered || isActive ? (
                   <button
                     onClick={() => isPlayable && handlePlayTrack(track.id)}
-                    className={`${isPlayable ? 'text-white hover:text-purple-500' : 'text-gray-600 cursor-not-allowed'} 
+                    className={`${isPlayable ? 'text-white hover:text-purple-500' : 'text-gray-600 cursor-not-allowed'}
                       transition-colors duration-200 p-1 rounded-full hover:bg-purple-500/20`}
                     disabled={!isPlayable}
                   >
@@ -99,7 +94,7 @@ export default function TrackList({
                   <span className="text-gray-500 font-medium">{index + 1}</span>
                 )}
               </div>
-              
+
               <div className="col-span-6 flex items-center">
                 <div className="w-10 h-10 relative mr-3 flex-shrink-0 rounded overflow-hidden shadow-md">
                   {track.album.cover_small ? (
@@ -127,12 +122,8 @@ export default function TrackList({
                   <div className="text-gray-400 text-sm truncate">{track.artist.name}</div>
                 </div>
               </div>
-              
+
               <div className="col-span-4 text-gray-400 truncate">{track.album.title}</div>
-              
-              <div className="col-span-1 flex justify-end items-center">
-                <span className="text-gray-400 font-mono text-sm">{formatDuration(track.duration)}</span>
-              </div>
             </div>
           );
         })
