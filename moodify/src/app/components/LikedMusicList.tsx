@@ -1,11 +1,12 @@
-// hackathon_may_stackup\moodify\src\app\components\LikedMusicList.tsx
 
+// hackathon_may_stackup\moodify\src\app\components\LikedMusicList.tsx
 
 
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Play, Heart, Clock } from "lucide-react";
 import MusicPlayer from "@/app/components/MusicPlayer";
+import CloudinaryMusicPlayer from "@/app/components/CloudinaryMusicPlayer";
 
 interface LikedTrack {
   trackId: string;
@@ -16,6 +17,7 @@ interface LikedTrack {
   genre?: string;
   mood?: string;
   likedAt: string;
+  cloudinaryUrl?: string; 
 }
 
 export default function LikedMusicList() {
@@ -25,9 +27,10 @@ export default function LikedMusicList() {
   const [currentTrack, setCurrentTrack] = useState<any | null>(null);
   const [showPlayer, setShowPlayer] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(-1);
-  const [playerKey, setPlayerKey] = useState(0); // Add a key to force remount
+  const [playerKey, setPlayerKey] = useState(0); 
   const [userInteracted, setUserInteracted] = useState(false);
   const playerRef = useRef<{ playTrack: () => void } | null>(null);
+  const [useCloudinaryPlayer, setUseCloudinaryPlayer] = useState(false);
 
   useEffect(() => {
     const fetchLikedTracks = async () => {
@@ -47,16 +50,15 @@ export default function LikedMusicList() {
       }
     };
     fetchLikedTracks();
-
+    
     // setting user interaction flag when user interacts with the page
     const handleInteraction = () => {
       setUserInteracted(true);
     };
-
     document.addEventListener('click', handleInteraction);
     document.addEventListener('keydown', handleInteraction);
     document.addEventListener('touchstart', handleInteraction);
-
+    
     return () => {
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('keydown', handleInteraction);
@@ -64,40 +66,83 @@ export default function LikedMusicList() {
     };
   }, []);
 
-const handlePlay = (track: LikedTrack, index: number) => {
-  setUserInteracted(true);
-  
-  if (showPlayer) {
-    setPlayerKey(prevKey => prevKey + 1);
-  }
-    const playerTrack = {
-    id: track.trackId,
-    title: track.title,
-    user: {
-      name: track.artist
-    },
-    artwork: {
-      "150x150": track.artwork,
-      "480x480": track.artwork,
-      "1000x1000": track.artwork
-    },
-    duration: track.duration,
-    genre: track.genre || "",
-    mood: track.mood || "",
-    play_count: 0 
-  };
-      
-  setCurrentTrack(playerTrack);
-  setCurrentTrackIndex(index);
-  setShowPlayer(true);
-      
-  setTimeout(() => {
-    if (playerRef.current && playerRef.current.playTrack) {
-      playerRef.current.playTrack();
+  const handlePlay = (track: LikedTrack, index: number) => {
+    setUserInteracted(true);
+    
+    if (showPlayer) {
+      setPlayerKey(prevKey => prevKey + 1);
     }
-  }, 300); 
-};
+    
+    // check if track has a cloudinaryUrl and set the player type accordingly
+    if (track.cloudinaryUrl) {
+      setUseCloudinaryPlayer(true);
+      
+      const cloudinaryTrack = {
+        _id: track.trackId,
+        title: track.title,
+        artist: track.artist,
+        cloudinaryUrl: track.cloudinaryUrl,
+        coverImage: track.artwork,
+        duration: track.duration,
+        genre: track.genre || "",
+        mood: track.mood || ""
+      };
+      
+      setCurrentTrack(cloudinaryTrack);
+    } else {
+      setUseCloudinaryPlayer(false);
+      
+      const playerTrack = {
+        id: track.trackId,
+        title: track.title,
+        user: {
+          name: track.artist
+        },
+        artwork: {
+          "150x150": track.artwork,
+          "480x480": track.artwork,
+          "1000x1000": track.artwork
+        },
+        duration: track.duration,
+        genre: track.genre || "",
+        mood: track.mood || "",
+        play_count: 0
+      };
+      
+      setCurrentTrack(playerTrack);
+    }
+    
+    setCurrentTrackIndex(index);
+    setShowPlayer(true);
+    
+    setTimeout(() => {
+      if (playerRef.current && playerRef.current.playTrack) {
+        playerRef.current.playTrack();
+      }
+    }, 300);
+  };
 
+  const handleAudiusError = () => {
+    // if we have a cloudinary URL for the current track, switch to cloudinary player
+    const track = likedTracks[currentTrackIndex];
+    if (track && track.cloudinaryUrl) {
+      setUseCloudinaryPlayer(true);
+      
+      const cloudinaryTrack = {
+        _id: track.trackId,
+        title: track.title,
+        artist: track.artist,
+        cloudinaryUrl: track.cloudinaryUrl,
+        coverImage: track.artwork,
+        duration: track.duration,
+        genre: track.genre || "",
+        mood: track.mood || ""
+      };
+      
+      setCurrentTrack(cloudinaryTrack);
+      setPlayerKey(prevKey => prevKey + 1);
+    }
+  };
 
   const handleUnlike = async (trackId: string, event: React.MouseEvent) => {
     event.stopPropagation();
@@ -131,39 +176,10 @@ const handlePlay = (track: LikedTrack, index: number) => {
     if (currentTrackIndex < likedTracks.length - 1) {
       const nextIndex = currentTrackIndex + 1;
       const nextTrack = likedTracks[nextIndex];
-      
-      setPlayerKey(prevKey => prevKey + 1);
-      
-      const playerTrack = {
-        id: nextTrack.trackId,
-        title: nextTrack.title,
-        user: {
-          name: nextTrack.artist
-        },
-        artwork: {
-          "150x150": nextTrack.artwork,
-          "480x480": nextTrack.artwork,
-          "1000x1000": nextTrack.artwork
-        },
-        duration: nextTrack.duration,
-        genre: nextTrack.genre || "",
-        mood: nextTrack.mood || "",
-        play_count: 0
-      };
-      
-      setCurrentTrack(playerTrack);
-      setCurrentTrackIndex(nextIndex);
-      setShowPlayer(true);
-      
-      setTimeout(() => {
-        if (playerRef.current && playerRef.current.playTrack) {
-          playerRef.current.playTrack();
-        }
-      }, 300);
+      handlePlay(nextTrack, nextIndex);
     }
   };
   
-
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = Math.floor(seconds % 60);
@@ -279,19 +295,36 @@ const handlePlay = (track: LikedTrack, index: number) => {
           </table>
         </div>
       </div>
+      
       {showPlayer && currentTrack && (
-        <MusicPlayer
-          key={playerKey}
-          ref={playerRef}
-          track={currentTrack}
-          onClose={() => setShowPlayer(false)}
-          autoPlay={true}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          hasPrevious={currentTrackIndex > 0}
-          hasNext={currentTrackIndex < likedTracks.length - 1}
-          userInteracted={userInteracted}
-        />
+        useCloudinaryPlayer ? (
+          <CloudinaryMusicPlayer
+            key={playerKey}
+            ref={playerRef}
+            track={currentTrack}
+            onClose={() => setShowPlayer(false)}
+            autoPlay={true}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            hasPrevious={currentTrackIndex > 0}
+            hasNext={currentTrackIndex < likedTracks.length - 1}
+            userInteracted={userInteracted}
+          />
+        ) : (
+          <MusicPlayer
+            key={playerKey}
+            ref={playerRef}
+            track={currentTrack}
+            onClose={() => setShowPlayer(false)}
+            autoPlay={true}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            hasPrevious={currentTrackIndex > 0}
+            hasNext={currentTrackIndex < likedTracks.length - 1}
+            userInteracted={userInteracted}
+            onError={handleAudiusError}
+          />
+        )
       )}
     </div>
   );

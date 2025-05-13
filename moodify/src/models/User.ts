@@ -22,6 +22,7 @@ export interface LikedTrack {
   duration: number;
   genre?: string;
   mood?: string;
+  cloudinaryUrl?: string; 
   likedAt: Date;
 }
 
@@ -97,11 +98,15 @@ const likedTrackSchema = new mongoose.Schema({
   mood: {
     type: String,
   },
+  cloudinaryUrl: {
+    type: String,
+  },
   likedAt: {
     type: Date,
     default: Date.now,
   },
 });
+
 
 const userSchema = new mongoose.Schema(
   {

@@ -1,3 +1,4 @@
+
 // hackathon_may_stackup\moodify\src\app\dashboard\my-music\page.tsx
 
 "use client";
@@ -349,6 +350,7 @@ export default function MyMusic() {
                     duration={track.duration}
                     genre={track.genre}
                     mood={track.mood}
+                    cloudinaryUrl={track.cloudinaryUrl} 
                   />
                 </div>
                 <div className="hidden md:flex md:col-span-1 justify-center">
@@ -528,7 +530,7 @@ export default function MyMusic() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {/* Add like button here */}
+              {/* adding like button here */}
               {currentTrack && (
                 <LikeButton
                   trackId={currentTrack._id}
@@ -538,6 +540,7 @@ export default function MyMusic() {
                   duration={currentTrack.duration}
                   genre={currentTrack.genre}
                   mood={currentTrack.mood}
+                  cloudinaryUrl={currentTrack.cloudinaryUrl}
                 />
               )}
               <button

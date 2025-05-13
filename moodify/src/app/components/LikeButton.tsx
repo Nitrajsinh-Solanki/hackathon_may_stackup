@@ -1,9 +1,7 @@
 // hackathon_may_stackup\moodify\src\app\components\LikeButton.tsx
 
 
-
 "use client";
-
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
 
@@ -15,6 +13,7 @@ interface LikeButtonProps {
   duration: number;
   genre?: string;
   mood?: string;
+  cloudinaryUrl?: string; 
 }
 
 export default function LikeButton({
@@ -24,11 +23,12 @@ export default function LikeButton({
   artwork,
   duration,
   genre,
-  mood
+  mood,
+  cloudinaryUrl 
 }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
+  
   // checking if the track is already liked when component mounts
   useEffect(() => {
     const checkLikeStatus = async () => {
@@ -42,12 +42,11 @@ export default function LikeButton({
         console.error("Error checking like status:", error);
       }
     };
-
     checkLikeStatus();
   }, [trackId]);
 
   const handleLikeToggle = async (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     
     setIsLoading(true);
     try {
@@ -63,10 +62,10 @@ export default function LikeButton({
           artwork,
           duration,
           genre,
-          mood
+          mood,
+          cloudinaryUrl 
         }),
       });
-
       if (response.ok) {
         const data = await response.json();
         setIsLiked(data.isLiked);

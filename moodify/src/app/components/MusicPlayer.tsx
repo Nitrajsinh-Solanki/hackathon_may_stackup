@@ -27,6 +27,7 @@ interface MusicPlayerProps {
   hasPrevious?: boolean;
   hasNext?: boolean;
   userInteracted?: boolean;
+  onError?: () => void;
 }
 
 const MusicPlayer = forwardRef(({ 
@@ -37,7 +38,8 @@ const MusicPlayer = forwardRef(({
   onNext,
   hasPrevious = false,
   hasNext = false,
-  userInteracted = false
+  userInteracted = false,
+  onError
 }: MusicPlayerProps, ref) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -129,7 +131,6 @@ useImperativeHandle(ref, () => ({
     audio.crossOrigin = "anonymous"; 
     audio.preload = "auto";
     
-    // In the useEffect where you set up audio source and event listeners
 const handleCanPlay = () => {
   console.log("Audio can play now");
   setIsAudioReady(true);
@@ -169,12 +170,12 @@ const handleCanPlay = () => {
     
     const handleError = () => {
       console.error("Audio error:", audio.error);
-      
+          
       if (loadAttempts < 3) {
         console.log(`Retrying load (attempt ${loadAttempts + 1})...`);
         setLoadAttempts(prev => prev + 1);
-        
-        // Try to reload with a slight delay
+                  
+        // trying to reload with a slight delay
         setTimeout(() => {
           if (audioRef.current) {
             const streamUrl = getStreamUrl(track.id);
@@ -184,8 +185,14 @@ const handleCanPlay = () => {
         }, 1000);
       } else {
         setAudioError("Failed to load audio. Please try again or try another track.");
+              
+        // calling the onError callback if provided
+        if (onError) {
+          onError();
+        }
       }
     };
+    
     
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     
@@ -517,4 +524,3 @@ const handleEnded = () => {
 MusicPlayer.displayName = "MusicPlayer";
 
 export default MusicPlayer;
-
