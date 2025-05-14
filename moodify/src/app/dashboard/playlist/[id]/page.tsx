@@ -1,4 +1,5 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\playlist\[id]\page.tsx
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -24,6 +25,7 @@ import {
 } from "@/lib/deezer-api";
 import { getPlayableTrackSource } from "@/lib/combined-api";
 import TrackList from "@/app/components/TrackList";
+import SavePlaylistButton from "@/app/components/SavePlaylistButton";
 
 export default function PlaylistDetailPage() {
   const params = useParams();
@@ -37,7 +39,6 @@ export default function PlaylistDetailPage() {
   const [currentTrack, setCurrentTrack] = useState<any | null>(null);
   const [isPlayerVisible, setIsPlayerVisible] = useState(false);
   const [isLoadingTrack, setIsLoadingTrack] = useState<number | null>(null);
-
   // audio player states
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -53,20 +54,16 @@ export default function PlaylistDetailPage() {
       try {
         setIsLoading(true);
         setError(null);
-
         console.log("Fetching playlist:", playlistId);
         const playlistData = await fetchPlaylist(playlistId);
         setPlaylist(playlistData);
-
         const trackData = playlistData.tracks?.data || [];
         setTracks(trackData);
-
         const displayTracks = trackData.map((track) => ({
           ...track,
           isPotentiallyPlayable: !!track.preview,
           source: track.preview ? "deezer" : null,
         }));
-
         setPlayableTracks(displayTracks);
         setIsLoading(false);
       } catch (err) {
@@ -83,12 +80,9 @@ export default function PlaylistDetailPage() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
-
     setAudioError(null);
-
     console.log("Setting up audio with track:", currentTrack);
     console.log("Stream URL:", currentTrack.streamUrl);
-
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => {
       console.log("Audio metadata loaded, duration:", audio.duration);
@@ -110,11 +104,9 @@ export default function PlaylistDetailPage() {
       setIsPlaying(false);
       setIsAudioLoading(false);
     };
-
     const handleCanPlay = () => {
       console.log("Audio can play now");
       setIsAudioLoading(false);
-
       if (isPlaying) {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
@@ -132,18 +124,13 @@ export default function PlaylistDetailPage() {
     audio.addEventListener("ended", handleEnded);
     audio.addEventListener("error", handleError);
     audio.addEventListener("canplay", handleCanPlay);
-
     // setting  the audio source
     if (currentTrack.streamUrl) {
       console.log("Setting audio source to:", currentTrack.streamUrl);
       setIsAudioLoading(true);
-
       audio.pause();
-
       audio.volume = isMuted ? 0 : volume;
-
       audio.src = currentTrack.streamUrl;
-
       audio.load();
     } else {
       console.error("No stream URL available for current track");
@@ -151,7 +138,6 @@ export default function PlaylistDetailPage() {
       setIsPlaying(false);
       setIsAudioLoading(false);
     }
-
     return () => {
       console.log("Cleaning up audio element");
       audio.pause();
@@ -167,7 +153,6 @@ export default function PlaylistDetailPage() {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack || isAudioLoading) return;
-
     if (isPlaying) {
       console.log("Attempting to play audio");
       const playPromise = audio.play();
@@ -196,10 +181,8 @@ export default function PlaylistDetailPage() {
 
   const handlePlayAll = async () => {
     if (tracks.length === 0) return;
-
     // find the first track with a preview (potentially playable)
     const firstPlayableTrack = tracks.find((t) => t.preview);
-
     if (firstPlayableTrack) {
       handleTrackPlay(firstPlayableTrack.id);
     } else {
@@ -210,30 +193,23 @@ export default function PlaylistDetailPage() {
   const handleTrackPlay = async (trackId: number) => {
     const track = tracks.find((t) => t.id === trackId);
     if (!track) return;
-
     if (currentTrack && currentTrack.id === trackId) {
       togglePlayPause();
       return;
     }
-
     setIsLoadingTrack(trackId);
-
     try {
       if (audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
       }
-
       const playableSource = await getPlayableTrackSource(track);
-
       if (playableSource) {
         setCurrentTrack(playableSource);
         setIsPlayerVisible(true);
-
         setTimeout(() => {
           setIsPlaying(true);
         }, 100);
-
         // updating the track in the playableTracks list with its source
         setPlayableTracks((prev) =>
           prev.map((pt) =>
@@ -266,7 +242,6 @@ export default function PlaylistDetailPage() {
       setAudioError("No audio available for this track.");
       return;
     }
-
     setIsPlaying((prevState) => !prevState);
   };
 
@@ -296,31 +271,25 @@ export default function PlaylistDetailPage() {
 
   const playNextTrack = () => {
     if (!currentTrack || playableTracks.length === 0) return;
-
     const playableOnly = playableTracks.filter(
       (pt) => pt.isPotentiallyPlayable
     );
     const currentIndex = playableOnly.findIndex(
       (pt) => pt.id === currentTrack.id
     );
-
     if (currentIndex === -1 || currentIndex === playableOnly.length - 1) return;
-
     handleTrackPlay(playableOnly[currentIndex + 1].id);
   };
 
   const playPreviousTrack = () => {
     if (!currentTrack || playableTracks.length === 0) return;
-
     const playableOnly = playableTracks.filter(
       (pt) => pt.isPotentiallyPlayable
     );
     const currentIndex = playableOnly.findIndex(
       (pt) => pt.id === currentTrack.id
     );
-
     if (currentIndex <= 0) return;
-
     handleTrackPlay(playableOnly[currentIndex - 1].id);
   };
 
@@ -332,22 +301,33 @@ export default function PlaylistDetailPage() {
     );
   }
 
-  if (error || !playlist) {
+  if (error) {
     return (
-      <div className="bg-red-900/20 border border-red-900 text-red-300 px-4 py-3 rounded-lg">
-        {error || "Failed to load playlist"}
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
+        <p className="text-gray-300">{error}</p>
+      </div>
+    );
+  }
+
+  if (!playlist) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold text-gray-300 mb-4">
+          Playlist not found
+        </h2>
+        <p className="text-gray-400">
+          The playlist you're looking for doesn't exist or is unavailable.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto pb-24">
-      {/* hidden audio element */}
-      <audio ref={audioRef} className="hidden" preload="metadata" />
-
+    <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row gap-8 mb-8">
-        <div className="flex-shrink-0 w-full md:w-64">
-          <div className="relative aspect-square rounded-lg overflow-hidden">
+        <div className="flex-shrink-0">
+          <div className="relative w-64 h-64 shadow-lg rounded-lg overflow-hidden">
             {playlist.picture_big ? (
               <Image
                 src={playlist.picture_big}
@@ -356,218 +336,178 @@ export default function PlaylistDetailPage() {
                 className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                <Music size={64} className="text-gray-500" />
+              <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                <Music size={64} className="text-gray-600" />
               </div>
             )}
           </div>
         </div>
-
-        {/* playlist Info */}
         <div className="flex-grow">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            {playlist.title}
-          </h1>
-          {playlist.description && (
-            <p className="text-gray-400 mb-4">{playlist.description}</p>
-          )}
-          <div className="flex flex-wrap gap-y-2 gap-x-4 text-sm text-gray-400 mb-6">
-            <div className="flex items-center">
-              <User size={16} className="mr-1" />
-              <span>By {playlist.creator?.name || "Unknown"}</span>
-            </div>
-            <div className="flex items-center">
-              <Music size={16} className="mr-1" />
-              <span>{playlist.nb_tracks} tracks</span>
-            </div>
-            {playlist.duration > 0 && (
-              <div className="flex items-center">
-                <Clock size={16} className="mr-1" />
-                <span>{formatDuration(playlist.duration)}</span>
+          <div className="flex flex-col h-full justify-between">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                {playlist.title}
+              </h1>
+              {playlist.description && (
+                <p className="text-gray-400 mb-4">{playlist.description}</p>
+              )}
+              <div className="flex items-center gap-2 text-gray-400 mb-2">
+                <User size={16} />
+                <span>{playlist.creator?.name || "Unknown Artist"}</span>
               </div>
-            )}
-            {playlist.fans > 0 && (
-              <div className="flex items-center">
-                <span>{playlist.fans.toLocaleString()} fans</span>
+              <div className="flex items-center gap-2 text-gray-400 mb-4">
+                <Music size={16} />
+                <span>{playlist.nb_tracks || tracks.length} tracks</span>
               </div>
-            )}
-          </div>
-          <button
-            onClick={handlePlayAll}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center"
-            disabled={!playableTracks.some((pt) => pt.isPotentiallyPlayable)}
-          >
-            <Play size={18} fill="white" className="mr-2" />
-            Play All
-          </button>
-
-          {/* playble tracks stats */}
-          <div className="mt-4 text-sm">
-            <span className="text-gray-400">
-              {playableTracks.filter((pt) => pt.isPotentiallyPlayable).length}{" "}
-              of {tracks.length} tracks playable
-            </span>
-            <div className="flex gap-2 mt-2">
-              <span className="px-2 py-1 bg-green-900/30 text-green-400 rounded-full text-xs">
-                🎧 Jamendo:{" "}
-                {playableTracks.filter((pt) => pt.source === "jamendo").length}
-              </span>
-              <span className="px-2 py-1 bg-purple-900/30 text-purple-400 rounded-full text-xs">
-                🎵 Deezer:{" "}
-                {playableTracks.filter((pt) => pt.source === "deezer").length}
-              </span>
+            </div>
+            <div className="flex gap-4 mt-4">
+              <button
+                onClick={handlePlayAll}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-full flex items-center gap-2 transition-colors"
+              >
+                <Play size={18} />
+                Play All
+              </button>
+              <SavePlaylistButton
+                playlistId={playlistId}
+                title={playlist.title}
+                description={playlist.description}
+                coverImage={playlist.picture_big}
+                trackCount={playlist.nb_tracks || tracks.length}
+                creator={playlist.creator?.name}
+              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* tracks */}
-      <div>
-        <h2 className="text-xl font-semibold text-white mb-4">Tracks</h2>
-        {tracks.length === 0 ? (
-          <div className="text-gray-400 text-center py-12">
-            This playlist has no tracks.
-          </div>
-        ) : (
-          <TrackList
-            tracks={tracks}
-            playableTracks={playableTracks}
-            onTrackPlay={handleTrackPlay}
-            isLoading={isLoadingPlayable}
-            loadingTrackId={isLoadingTrack}
-            currentlyPlayingId={currentTrack?.id || null} 
-          />
-        )}
-      </div>
+      <TrackList
+        tracks={playableTracks}
+        onTrackPlay={handleTrackPlay}
+        currentlyPlayingId={currentTrack?.id}
+        loadingTrackId={isLoadingTrack}
+      />
 
-      {/* custom Music Player */}
-      {isPlayerVisible && currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={currentTrack.image || "/placeholder-album.png"}
-                  alt={currentTrack.title}
-                  className="w-12 h-12 rounded-md object-cover"
-                />
-                <div>
-                  <h4 className="text-white font-medium truncate max-w-[200px]">
-                    {currentTrack.title}
-                  </h4>
-                  <p className="text-gray-400 text-sm truncate max-w-[200px]">
-                    {currentTrack.artist}
-                  </p>
-                  {audioError && (
-                    <p className="text-red-400 text-xs mt-1">{audioError}</p>
-                  )}
-                  {isAudioLoading && (
-                    <p className="text-yellow-400 text-xs mt-1">
-                      Loading audio...
+      {isPlayerVisible && (
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4 shadow-lg">
+          <div className="container mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 relative w-12 h-12 rounded overflow-hidden">
+                {currentTrack?.album?.cover_small ? (
+                  <Image
+                    src={currentTrack.album.cover_small}
+                    alt={currentTrack.title}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+                    <Music size={16} className="text-gray-600" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-grow min-w-0">
+                <div className="flex justify-between items-start">
+                  <div className="truncate">
+                    <h4 className="text-white font-medium truncate">
+                      {currentTrack?.title}
+                    </h4>
+                    <p className="text-gray-400 text-sm truncate">
+                      {currentTrack?.artist?.name}
                     </p>
-                  )}
-                  {currentTrack.source && (
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        currentTrack.source === "jamendo"
-                          ? "bg-green-900/30 text-green-400"
-                          : "bg-purple-900/30 text-purple-400"
-                      }`}
-                    >
-                      {currentTrack.source === "jamendo"
-                        ? "🎧 Jamendo"
-                        : "🎵 Deezer"}
-                    </span>
+                  </div>
+                  <button
+                    onClick={handleClosePlayer}
+                    className="text-gray-400 hover:text-white ml-2"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="mt-2">
+                  {audioError ? (
+                    <div className="text-red-500 text-sm mb-2">
+                      {audioError}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4">
+                      <span className="text-xs text-gray-400 w-10">
+                        {formatTime(currentTime)}
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max={duration || 1}
+                        value={currentTime}
+                        onChange={handleSeek}
+                        className="flex-grow h-1 bg-gray-700 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500"
+                      />
+                      <span className="text-xs text-gray-400 w-10">
+                        {formatTime(duration)}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
-              <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4">
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={playPreviousTrack}
-                    className="text-gray-400 hover:text-white"
-                    disabled={!currentTrack.streamUrl || isAudioLoading}
-                  >
-                    <SkipBack size={20} />
-                  </button>
-                  <button
-                    onClick={togglePlayPause}
-                    className={`${
-                      currentTrack.streamUrl && !isAudioLoading
-                        ? "bg-purple-600 hover:bg-purple-700"
-                        : "bg-gray-600 cursor-not-allowed"
-                    } text-white rounded-full p-2`}
-                    disabled={!currentTrack.streamUrl || isAudioLoading}
-                  >
-                    {isPlaying ? <Pause size={20} /> : <Play size={20} />}
-                  </button>
-                  <button
-                    onClick={playNextTrack}
-                    className="text-gray-400 hover:text-white"
-                    disabled={!currentTrack.streamUrl || isAudioLoading}
-                  >
-                    <SkipForward size={20} />
-                  </button>
-                </div>
-                <div className="w-full flex items-center space-x-2">
-                  <span className="text-xs text-gray-400 w-10">
-                    {formatTime(currentTime)}
-                  </span>
-                  <input
-                    type="range"
-                    min="0"
-                    max={duration || 0}
-                    value={currentTime}
-                    onChange={handleSeek}
-                    disabled={isAudioLoading}
-                    className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    style={{
-                      backgroundSize: `${
-                        (currentTime / (duration || 1)) * 100
-                      }% 100%`,
-                      backgroundImage: "linear-gradient(#9333ea, #9333ea)",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  />
-                  <span className="text-xs text-gray-400 w-10 text-right">
-                    {formatTime(duration || 0)}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={toggleMute}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    {isMuted ? <Volume2 size={20} /> : <Volume size={20} />}
-                  </button>
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                    style={{
-                      backgroundSize: `${volume * 100}% 100%`,
-                      backgroundImage: "linear-gradient(#9333ea, #9333ea)",
-                      backgroundRepeat: "no-repeat",
-                    }}
-                  />
-                </div>
+
+              <div className="flex items-center gap-3">
                 <button
-                  onClick={handleClosePlayer}
+                  onClick={playPreviousTrack}
+                  className="text-gray-400 hover:text-white"
+                  disabled={isAudioLoading}
+                >
+                  <SkipBack size={20} />
+                </button>
+                <button
+                  onClick={togglePlayPause}
+                  disabled={isAudioLoading || !!audioError}
+                  className={`p-2 rounded-full ${
+                    isAudioLoading
+                      ? "bg-gray-700 text-gray-500"
+                      : "bg-purple-600 hover:bg-purple-700 text-white"
+                  }`}
+                >
+                  {isAudioLoading ? (
+                    <div className="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                  ) : isPlaying ? (
+                    <Pause size={20} />
+                  ) : (
+                    <Play size={20} />
+                  )}
+                </button>
+                <button
+                  onClick={playNextTrack}
+                  className="text-gray-400 hover:text-white"
+                  disabled={isAudioLoading}
+                >
+                  <SkipForward size={20} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 ml-4">
+                <button
+                  onClick={toggleMute}
                   className="text-gray-400 hover:text-white"
                 >
-                  <X size={20} />
+                  {isMuted ? <Volume size={20} /> : <Volume2 size={20} />}
                 </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  className="w-20 h-1 bg-gray-700 rounded-full appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500"
+                />
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <audio ref={audioRef} />
     </div>
   );
 }

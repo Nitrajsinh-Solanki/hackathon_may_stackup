@@ -49,6 +49,8 @@ export interface DeezerAlbum {
 }
 
 export interface DeezerTrack {
+  streamUrl: string;
+  source: any;
   id: number;
   readable: boolean;
   title: string;

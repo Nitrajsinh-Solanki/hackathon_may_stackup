@@ -1,5 +1,7 @@
 // moodify\src\models\User.ts
 
+
+
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -26,6 +28,16 @@ export interface LikedTrack {
   likedAt: Date;
 }
 
+export interface SavedPlaylist {
+  playlistId: string;
+  title: string;
+  description?: string;
+  coverImage: string;
+  trackCount: number;
+  creator?: string;
+  savedAt: Date;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
@@ -33,6 +45,7 @@ export interface IUser extends mongoose.Document {
   isVerified: boolean;
   uploadedTracks: UploadedTrack[];
   likedTracks: LikedTrack[];
+  savedPlaylists: SavedPlaylist[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -107,6 +120,34 @@ const likedTrackSchema = new mongoose.Schema({
   },
 });
 
+const savedPlaylistSchema = new mongoose.Schema({
+  playlistId: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  coverImage: {
+    type: String,
+    required: true,
+  },
+  trackCount: {
+    type: Number,
+    required: true,
+  },
+  creator: {
+    type: String,
+  },
+  savedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
 
 const userSchema = new mongoose.Schema(
   {
@@ -135,6 +176,7 @@ const userSchema = new mongoose.Schema(
     },
     uploadedTracks: [uploadedTrackSchema],
     likedTracks: [likedTrackSchema],
+    savedPlaylists: [savedPlaylistSchema],
   },
   {
     timestamps: true,
