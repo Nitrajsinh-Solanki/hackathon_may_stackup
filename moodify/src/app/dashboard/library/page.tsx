@@ -1,15 +1,17 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\library\page.tsx.
 
 
-
 "use client";
 
 import { useState } from "react";
 import { Heart, ListMusic, Disc, PlusCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import LikedMusicList from "@/app/components/LikedMusicList";
+import SavedPlaylistsList from "@/app/components/SavedPlaylistsList";
 
 export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState("liked");
+  const router = useRouter();
 
   const tabs = [
     { id: "liked", label: "Liked Music", icon: <Heart size={18} /> },
@@ -19,15 +21,19 @@ export default function LibraryPage() {
     { id: "create-playlist", label: "Create New Playlist", icon: <PlusCircle size={18} /> },
   ];
 
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+  };
+
   return (
     <div className="w-full">
-      {/* Horizontal Navigation */}
+      {/* horizontal navigation is implemented here */}
       <div className="mb-8 border-b border-gray-800 overflow-x-auto">
         <div className="flex space-x-2 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={`flex items-center space-x-2 px-4 py-3 transition-colors ${
                 activeTab === tab.id
                   ? "text-purple-500 border-b-2 border-purple-500"
@@ -40,7 +46,7 @@ export default function LibraryPage() {
           ))}
         </div>
       </div>
-
+      
       {/* content Area */}
       <div className="mt-6">
         {activeTab === "liked" && (
@@ -49,16 +55,14 @@ export default function LibraryPage() {
             <LikedMusicList />
           </div>
         )}
-
+        
         {activeTab === "saved-playlists" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Saved Playlists</h2>
-            <div className="bg-gray-800/50 rounded-lg p-8 text-center">
-              <p className="text-gray-400">Your saved playlists will appear here</p>
-            </div>
+            <SavedPlaylistsList />
           </div>
         )}
-
+        
         {activeTab === "saved-albums" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Saved Albums</h2>
@@ -67,7 +71,7 @@ export default function LibraryPage() {
             </div>
           </div>
         )}
-
+        
         {activeTab === "created-playlists" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Created Playlists</h2>
@@ -76,7 +80,7 @@ export default function LibraryPage() {
             </div>
           </div>
         )}
-
+        
         {activeTab === "create-playlist" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Create a New Playlist</h2>
