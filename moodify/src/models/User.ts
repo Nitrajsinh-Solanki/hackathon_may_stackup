@@ -1,7 +1,6 @@
 // moodify\src\models\User.ts
 
 
-
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -38,6 +37,17 @@ export interface SavedPlaylist {
   savedAt: Date;
 }
 
+export interface SavedAlbum {
+  albumId: string;
+  title: string;
+  artist: string;
+  coverImage: string;
+  year?: string;
+  genre?: string;
+  trackCount: number;
+  savedAt: Date;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
@@ -46,6 +56,7 @@ export interface IUser extends mongoose.Document {
   uploadedTracks: UploadedTrack[];
   likedTracks: LikedTrack[];
   savedPlaylists: SavedPlaylist[];
+  savedAlbums: SavedAlbum[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -149,6 +160,39 @@ const savedPlaylistSchema = new mongoose.Schema({
   },
 });
 
+const savedAlbumSchema = new mongoose.Schema({
+  albumId: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  artist: {
+    type: String,
+    required: true,
+  },
+  coverImage: {
+    type: String,
+    required: true,
+  },
+  year: {
+    type: String,
+  },
+  genre: {
+    type: String,
+  },
+  trackCount: {
+    type: Number,
+    required: true,
+  },
+  savedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -177,6 +221,7 @@ const userSchema = new mongoose.Schema(
     uploadedTracks: [uploadedTrackSchema],
     likedTracks: [likedTrackSchema],
     savedPlaylists: [savedPlaylistSchema],
+    savedAlbums: [savedAlbumSchema],
   },
   {
     timestamps: true,

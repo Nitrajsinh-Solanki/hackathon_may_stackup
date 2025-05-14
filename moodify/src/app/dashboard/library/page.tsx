@@ -1,16 +1,15 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\library\page.tsx.
-
-
 "use client";
-
-import { useState } from "react";
-import { Heart, ListMusic, Disc, PlusCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Heart, ListMusic, Disc, PlusCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import LikedMusicList from "@/app/components/LikedMusicList";
 import SavedPlaylistsList from "@/app/components/SavedPlaylistsList";
+import SavedAlbumsList from "@/app/components/SavedAlbumsList";
 
 export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState("liked");
+  const [refreshKey, setRefreshKey] = useState(0);
   const router = useRouter();
 
   const tabs = [
@@ -23,6 +22,10 @@ export default function LibraryPage() {
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
+  };
+
+  const forceRefresh = () => {
+    setRefreshKey(prev => prev + 1);
   };
 
   return (
@@ -47,28 +50,37 @@ export default function LibraryPage() {
         </div>
       </div>
       
+      {/* refresh button */}
+      <div className="flex justify-end mb-4">
+        <button 
+          onClick={forceRefresh}
+          className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white bg-gray-800/50 px-3 py-1 rounded-full"
+        >
+          <RefreshCw size={14} />
+          <span>Refresh</span>
+        </button>
+      </div>
+      
       {/* content Area */}
       <div className="mt-6">
         {activeTab === "liked" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Liked Music</h2>
-            <LikedMusicList />
+            <LikedMusicList key={`liked-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "saved-playlists" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Saved Playlists</h2>
-            <SavedPlaylistsList />
+            <SavedPlaylistsList key={`playlists-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "saved-albums" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Saved Albums</h2>
-            <div className="bg-gray-800/50 rounded-lg p-8 text-center">
-              <p className="text-gray-400">Your saved albums will appear here</p>
-            </div>
+            <SavedAlbumsList key={`albums-${refreshKey}`} />
           </div>
         )}
         
@@ -77,7 +89,7 @@ export default function LibraryPage() {
             <h2 className="text-xl font-semibold mb-4">Your Created Playlists</h2>
             <div className="bg-gray-800/50 rounded-lg p-8 text-center">
               <p className="text-gray-400">Your created playlists will appear here</p>
-            </div>
+              </div>
           </div>
         )}
         
@@ -119,3 +131,4 @@ export default function LibraryPage() {
     </div>
   );
 }
+
