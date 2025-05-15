@@ -90,7 +90,7 @@ export default function SavedAlbumsList() {
           <Disc size={48} className="text-gray-500 mx-auto mb-4" />
           <p className="text-gray-400 mb-4">You haven't saved any albums yet</p>
           <button 
-            onClick={() => router.push('/dashboard/explore')}
+            onClick={() => router.push('/dashboard/playlist-album')}
             className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-full inline-flex items-center"
           >
             <ExternalLink size={18} className="mr-2" />

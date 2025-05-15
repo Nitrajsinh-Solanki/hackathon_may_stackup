@@ -1,11 +1,20 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\library\page.tsx.
+
+
+
+
+
+
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Heart, ListMusic, Disc, PlusCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import LikedMusicList from "@/app/components/LikedMusicList";
 import SavedPlaylistsList from "@/app/components/SavedPlaylistsList";
 import SavedAlbumsList from "@/app/components/SavedAlbumsList";
+import CreatePlaylistForm from "@/app/components/CreatePlaylistForm";
+import CreatedPlaylistsList from "@/app/components/CreatedPlaylistList";
 
 export default function LibraryPage() {
   const [activeTab, setActiveTab] = useState("liked");
@@ -36,6 +45,7 @@ export default function LibraryPage() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              data-tab={tab.id}
               onClick={() => handleTabChange(tab.id)}
               className={`flex items-center space-x-2 px-4 py-3 transition-colors ${
                 activeTab === tab.id
@@ -87,48 +97,20 @@ export default function LibraryPage() {
         {activeTab === "created-playlists" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Your Created Playlists</h2>
-            <div className="bg-gray-800/50 rounded-lg p-8 text-center">
-              <p className="text-gray-400">Your created playlists will appear here</p>
-              </div>
+            <CreatedPlaylistsList key={`created-playlists-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "create-playlist" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Create a New Playlist</h2>
-            <div className="bg-gray-800/50 rounded-lg p-8">
-              <div className="max-w-md mx-auto">
-                <div className="mb-4">
-                  <label htmlFor="playlist-name" className="block text-sm font-medium text-gray-300 mb-2">
-                    Playlist Name
-                  </label>
-                  <input
-                    type="text"
-                    id="playlist-name"
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Enter playlist name"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="playlist-description" className="block text-sm font-medium text-gray-300 mb-2">
-                    Description (optional)
-                  </label>
-                  <textarea
-                    id="playlist-description"
-                    rows={3}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Enter playlist description"
-                  ></textarea>
-                </div>
-                <button className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors">
-                  Create Playlist
-                </button>
-              </div>
-            </div>
+            <CreatePlaylistForm onSuccess={() => {
+              forceRefresh();
+              setActiveTab("created-playlists");
+            }} />
           </div>
         )}
       </div>
     </div>
   );
 }
-

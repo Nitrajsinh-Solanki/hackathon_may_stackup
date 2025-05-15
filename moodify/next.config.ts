@@ -16,12 +16,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'api.deezer.com',
       },
-      // Add TheAudioDB domain
+      // TheAudioDB domain
       {
         protocol: 'https',
         hostname: 'www.theaudiodb.com',
       },
-      // Also add these in case TheAudioDB uses different subdomains
       {
         protocol: 'https',
         hostname: 'theaudiodb.com',
@@ -33,6 +32,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'http',
         hostname: 'theaudiodb.com',
+      },
+      // adding the cloudinary domain
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
       },
     ],
   },

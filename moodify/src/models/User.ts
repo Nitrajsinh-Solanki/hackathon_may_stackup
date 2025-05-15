@@ -1,6 +1,5 @@
 // moodify\src\models\User.ts
 
-
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
@@ -48,6 +47,25 @@ export interface SavedAlbum {
   savedAt: Date;
 }
 
+export interface PlaylistTrack {
+  trackId: string;
+  title: string;
+  artist: string;
+  cloudinaryUrl: string;
+  coverImage?: string;
+  duration: number;
+  addedAt: Date;
+}
+
+export interface CreatedPlaylist {
+  name: string;
+  description?: string;
+  coverImage?: string;
+  tracks: PlaylistTrack[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
@@ -57,6 +75,7 @@ export interface IUser extends mongoose.Document {
   likedTracks: LikedTrack[];
   savedPlaylists: SavedPlaylist[];
   savedAlbums: SavedAlbum[];
+  createdPlaylists: CreatedPlaylist[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -193,6 +212,60 @@ const savedAlbumSchema = new mongoose.Schema({
   },
 });
 
+const playlistTrackSchema = new mongoose.Schema({
+  trackId: {
+    type: String,
+    required: true,
+  },
+  title: {
+    type: String,
+    required: true,
+  },
+  artist: {
+    type: String,
+    required: true,
+  },
+  cloudinaryUrl: {
+    type: String,
+    required: true,
+  },
+  coverImage: {
+    type: String,
+  },
+  duration: {
+    type: Number,
+    required: true,
+  },
+  addedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const createdPlaylistSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  description: {
+    type: String,
+    trim: true,
+  },
+  coverImage: {
+    type: String,
+  },
+  tracks: [playlistTrackSchema],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -222,6 +295,7 @@ const userSchema = new mongoose.Schema(
     likedTracks: [likedTrackSchema],
     savedPlaylists: [savedPlaylistSchema],
     savedAlbums: [savedAlbumSchema],
+    createdPlaylists: [createdPlaylistSchema],
   },
   {
     timestamps: true,
@@ -244,4 +318,5 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
 };
 
 const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+
 export default User;
