@@ -1,7 +1,7 @@
 // hackathon_may_stackup\moodify\src\app\components\TrackList.tsx
 
 
-
+// this page is for playlist and album section
 'use client';
 
 import { useState, useEffect } from 'react';

@@ -1,11 +1,14 @@
 // hackathon_may_stackup\moodify\src\app\components\CreatedPlaylistList.tsx
 
 
-"use client";
 
+
+
+"use client";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Music, MoreVertical, Play, Trash2, Edit } from "lucide-react";
 import { CreatedPlaylist } from "@/models/User";
 import EditPlaylistModal from "./EditPlaylistModal";
@@ -18,6 +21,7 @@ export default function CreatedPlaylistsList() {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [editingPlaylist, setEditingPlaylist] = useState<(CreatedPlaylist & { _id?: string }) | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const router = useRouter();
   
   // creating a ref for the document to handle click outside
   const documentRef = useRef<Document | null>(null);
@@ -53,7 +57,7 @@ export default function CreatedPlaylistsList() {
       const isDropdownToggle = target.closest('[data-dropdown-toggle]');
       
       if (!isDropdownToggle || 
-          (isDropdownToggle && isDropdownToggle.getAttribute('data-dropdown-toggle') !== activeDropdown)) {
+         (isDropdownToggle && isDropdownToggle.getAttribute('data-dropdown-toggle') !== activeDropdown)) {
         const isInsideDropdown = target.closest(`[data-dropdown-menu="${activeDropdown}"]`);
         
         if (!isInsideDropdown) {
@@ -68,12 +72,14 @@ export default function CreatedPlaylistsList() {
     };
   }, [activeDropdown]);
 
-  const toggleDropdown = (playlistId: string | undefined) => {
+  const toggleDropdown = (e: React.MouseEvent, playlistId: string | undefined) => {
+    e.stopPropagation(); 
     if (!playlistId) return;
     setActiveDropdown(activeDropdown === playlistId ? null : playlistId);
   };
 
-  const handleDeletePlaylist = async (playlistId: string | undefined) => {
+  const handleDeletePlaylist = async (e: React.MouseEvent, playlistId: string | undefined) => {
+    e.stopPropagation(); 
     if (!playlistId) return;
     
     try {
@@ -96,7 +102,8 @@ export default function CreatedPlaylistsList() {
     }
   };
 
-  const handleEditPlaylist = (playlist: CreatedPlaylist & { _id?: string }) => {
+  const handleEditPlaylist = (e: React.MouseEvent, playlist: CreatedPlaylist & { _id?: string }) => {
+    e.stopPropagation(); 
     setEditingPlaylist(playlist);
     setIsEditModalOpen(true);
     setActiveDropdown(null);
@@ -104,6 +111,17 @@ export default function CreatedPlaylistsList() {
 
   const handleEditSuccess = () => {
     fetchPlaylists();
+  };
+
+  const handlePlaylistClick = (playlistId: string | undefined) => {
+    if (!playlistId) return;
+    router.push(`/dashboard/library/${playlistId}`);
+  };
+
+  const handlePlayClick = (e: React.MouseEvent, playlistId: string | undefined) => {
+    e.stopPropagation(); 
+    if (!playlistId) return;
+    router.push(`/dashboard/library/${playlistId}`);
   };
 
   if (isLoading) {
@@ -154,7 +172,11 @@ export default function CreatedPlaylistsList() {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {playlists.map((playlist, index) => (
-          <div key={index} className="bg-gray-800/40 rounded-lg overflow-hidden hover:bg-gray-800/60 transition-colors group">
+          <div 
+            key={index} 
+            className="bg-gray-800/40 rounded-lg overflow-hidden hover:bg-gray-800/60 transition-colors group cursor-pointer"
+            onClick={() => handlePlaylistClick(playlist._id)}
+          >
             <div className="relative aspect-square">
               {playlist.coverImage ? (
                 <Image 
@@ -169,7 +191,10 @@ export default function CreatedPlaylistsList() {
                 </div>
               )}
               <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <button className="bg-purple-600 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform">
+                <button 
+                  className="bg-purple-600 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform"
+                  onClick={(e) => handlePlayClick(e, playlist._id)}
+                >
                   <Play fill="white" size={20} className="text-white ml-1" />
                 </button>
               </div>
@@ -185,7 +210,7 @@ export default function CreatedPlaylistsList() {
                 <div className="relative">
                   <button 
                     className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-700"
-                    onClick={() => toggleDropdown(playlist._id)}
+                    onClick={(e) => toggleDropdown(e, playlist._id)}
                     data-dropdown-toggle={playlist._id}
                     aria-label="More options"
                   >
@@ -194,7 +219,7 @@ export default function CreatedPlaylistsList() {
                   
                   {activeDropdown === playlist._id && (
                     <div 
-                      className="fixed z-[9999]" 
+                      className="fixed z-[9999]"
                       style={{
                         top: '0',
                         left: '0',
@@ -216,14 +241,14 @@ export default function CreatedPlaylistsList() {
                       >
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
-                          onClick={() => handleEditPlaylist(playlist)}
+                          onClick={(e) => handleEditPlaylist(e, playlist)}
                         >
                           <Edit size={16} className="mr-2" />
                           Edit Playlist
                         </button>
                         <button
                           className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
-                          onClick={() => handleDeletePlaylist(playlist._id)}
+                          onClick={(e) => handleDeletePlaylist(e, playlist._id)}
                           disabled={isDeleting === playlist._id}
                         >
                           {isDeleting === playlist._id ? (
@@ -247,7 +272,6 @@ export default function CreatedPlaylistsList() {
           </div>
         ))}
       </div>
-
       {editingPlaylist && (
         <EditPlaylistModal
           playlist={editingPlaylist}

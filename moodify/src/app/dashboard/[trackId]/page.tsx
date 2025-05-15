@@ -1,13 +1,15 @@
 // moodify\src\app\dashboard\[trackId]\page.tsx
 
+
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Track, getTrackById, getStreamUrl } from '@/lib/audius-api';
-import { Loader2, ArrowLeft, Clock, Heart, Download } from 'lucide-react';
+import { Loader2, ArrowLeft, Clock, Heart, Download, ListPlus, Play } from 'lucide-react';
 import MusicPlayer from '@/app/components/MusicPlayer';
 import { formatDuration } from '@/lib/audius-api';
 import { useLikedTracks } from '@/app/context/LikedTracksContext';
+import PlaylistSelector from '@/app/components/PlaylistSelector';
 import React from 'react';
 
 export default function TrackPage() {
@@ -21,6 +23,7 @@ export default function TrackPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [showPlaylistSelector, setShowPlaylistSelector] = useState(false);
   
   const { checkTrackLiked, toggleLike } = useLikedTracks();
   const isLiked = track ? checkTrackLiked(track.id) : false;
@@ -56,6 +59,10 @@ export default function TrackPage() {
 
   const handleBack = () => {
     router.back();
+  };
+
+  const handlePlayTrack = () => {
+    setIsPlaying(true);
   };
 
   const handleDownload = () => {
@@ -95,6 +102,10 @@ export default function TrackPage() {
       setIsLikeLoading(false);
     }
   };
+
+  const handleAddToPlaylist = () => {
+    setShowPlaylistSelector(true);
+  };
   
   if (isLoading) {
     return (
@@ -130,15 +141,25 @@ export default function TrackPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-1">
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700">
+          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 relative group">
             <img
               src={track.artwork['1000x1000'] || track.artwork['480x480'] || '/placeholder-album.png'}
               alt={track.title}
               className="w-full aspect-square object-cover"
             />
+            
+            {/* Play button overlay */}
+            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={handlePlayTrack}
+                className="bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full"
+              >
+                <Play size={24} fill="white" />
+              </button>
+            </div>
           </div>
           
-          <div className="mt-4 flex justify-between">
+          <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={handleLikeToggle}
               disabled={isLikeLoading}
@@ -153,11 +174,19 @@ export default function TrackPage() {
             </button>
             
             <button
+              onClick={handleAddToPlaylist}
+              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full flex items-center"
+            >
+              <ListPlus size={18} className="mr-2" />
+              Add to Playlist
+            </button>
+            
+            <button
               onClick={handleDownload}
               className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full flex items-center"
             >
               <Download size={18} className="mr-2" />
-              Download Track
+              Download
             </button>
           </div>
         </div>
@@ -201,11 +230,20 @@ export default function TrackPage() {
         </div>
       </div>
       
-      {track && (
+      {track && showPlayer && (
         <MusicPlayer
           track={track}
           onClose={() => setIsPlaying(false)}
-          autoPlay={true}
+          autoPlay={isPlaying}
+        />
+      )}
+
+      {/* playlist selector modal */}
+      {track && (
+        <PlaylistSelector
+          isOpen={showPlaylistSelector}
+          onClose={() => setShowPlaylistSelector(false)}
+          track={track}
         />
       )}
     </div>
