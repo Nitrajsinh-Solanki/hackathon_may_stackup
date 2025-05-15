@@ -1,6 +1,5 @@
 // hackathon_may_stackup\moodify\src\app\components\LikeButton.tsx
 
-
 "use client";
 import { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
@@ -13,7 +12,8 @@ interface LikeButtonProps {
   duration: number;
   genre?: string;
   mood?: string;
-  cloudinaryUrl?: string; 
+  cloudinaryUrl?: string;
+  iconSize?: number;
 }
 
 export default function LikeButton({
@@ -24,7 +24,8 @@ export default function LikeButton({
   duration,
   genre,
   mood,
-  cloudinaryUrl 
+  cloudinaryUrl,
+  iconSize = 28
 }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,12 +84,12 @@ export default function LikeButton({
       disabled={isLoading}
       className={`transition-colors ${
         isLiked 
-          ? "text-red-500 hover:text-red-400" 
+          ? "text-red-500 hover:text-red-400"
           : "text-gray-400 hover:text-red-400"
       }`}
       aria-label={isLiked ? "Unlike" : "Like"}
     >
-      <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
+      <Heart size={iconSize} fill={isLiked ? "currentColor" : "none"} />
     </button>
   );
 }

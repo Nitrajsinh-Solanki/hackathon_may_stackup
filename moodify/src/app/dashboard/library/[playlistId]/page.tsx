@@ -1,18 +1,23 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\library\[playlistId]\page.tsx
 
 
+
+
+
+
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Clock, Music, Play, Trash } from "lucide-react";
 import MusicPlayer from "@/app/components/MusicPlayer";
+import CloudinaryMusicPlayer from "@/app/components/CloudinaryMusicPlayer";
 import { formatDuration } from "@/lib/audius-api";
 
 interface PlaylistTrack {
   trackId: string;
   title: string;
   artist: string;
-  cloudinaryUrl: string;
+  cloudinaryUrl?: string;
   coverImage?: string;
   duration: number;
   addedAt: Date;
@@ -38,6 +43,7 @@ export default function PlaylistDetailPage() {
   const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(-1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRemovingTrack, setIsRemovingTrack] = useState<string | null>(null);
+  const [playerError, setPlayerError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPlaylist = async () => {
@@ -56,7 +62,6 @@ export default function PlaylistDetailPage() {
         setIsLoading(false);
       }
     };
-
     if (playlistId) {
       fetchPlaylist();
     }
@@ -69,30 +74,35 @@ export default function PlaylistDetailPage() {
   const handlePlayTrack = (index: number) => {
     setCurrentTrackIndex(index);
     setIsPlaying(true);
+    setPlayerError(null);
   };
 
   const handlePlayAll = () => {
     if (playlist && playlist.tracks.length > 0) {
       setCurrentTrackIndex(0);
       setIsPlaying(true);
+      setPlayerError(null);
     }
   };
 
   const handlePrevious = () => {
     if (currentTrackIndex > 0) {
       setCurrentTrackIndex(currentTrackIndex - 1);
+      setPlayerError(null);
     }
   };
 
   const handleNext = () => {
     if (playlist && currentTrackIndex < playlist.tracks.length - 1) {
       setCurrentTrackIndex(currentTrackIndex + 1);
+      setPlayerError(null);
     }
   };
 
   const handleClosePlayer = () => {
     setIsPlaying(false);
     setCurrentTrackIndex(-1);
+    setPlayerError(null);
   };
 
   const handleRemoveTrack = async (e: React.MouseEvent, trackId: string) => {
@@ -140,6 +150,11 @@ export default function PlaylistDetailPage() {
     });
   };
 
+  const handlePlayerError = () => {
+    setPlayerError("Failed to play this track. Trying alternative player...");
+    // We'll let the player component handle the error internally
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -166,6 +181,9 @@ export default function PlaylistDetailPage() {
     ? playlist.tracks[currentTrackIndex] 
     : null;
 
+  // checking if the current track is a cloudinary track
+  const isCloudinaryTrack = currentTrack && 'cloudinaryUrl' in currentTrack && !!currentTrack.cloudinaryUrl;
+
   return (
     <div className="pb-24">
       <button
@@ -179,7 +197,7 @@ export default function PlaylistDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <div className="md:col-span-1">
           <div 
-            className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 aspect-square relative group cursor-pointer"
+            className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 relative group cursor-pointer max-w-xs mx-auto md:mx-0 h-48 sm:h-64 md:h-auto md:aspect-square"
             onClick={handlePlayAll}
           >
             {playlist.coverImage ? (
@@ -194,8 +212,7 @@ export default function PlaylistDetailPage() {
               </div>
             )}
             
-            {/* play button overlay */}
-            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+=            <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 className="bg-purple-600 hover:bg-purple-700 text-white p-4 rounded-full"
                 disabled={playlist.tracks.length === 0}
@@ -236,6 +253,12 @@ export default function PlaylistDetailPage() {
       {/* tracks list */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Tracks</h2>
+        
+        {playerError && (
+          <div className="bg-yellow-900/20 border border-yellow-800 rounded-lg p-3 mb-4 text-yellow-300">
+            {playerError}
+          </div>
+        )}
         
         {playlist.tracks.length === 0 ? (
           <div className="bg-gray-800/50 rounded-lg p-8 text-center">
@@ -299,6 +322,7 @@ export default function PlaylistDetailPage() {
                         </div>
                         <div className="truncate">
                           <div className="text-white truncate">{track.title}</div>
+                          
                         </div>
                       </div>
                     </td>
@@ -328,16 +352,34 @@ export default function PlaylistDetailPage() {
         )}
       </div>
 
-      {/* music Player is implemented here */}
-      {currentTrack && (
+      {/* rendering the appropriate music player based on track type */}
+      {currentTrack && isCloudinaryTrack ? (
+        <CloudinaryMusicPlayer
+          track={{
+            _id: currentTrack.trackId,
+            title: currentTrack.title,
+            artist: currentTrack.artist,
+            cloudinaryUrl: currentTrack.cloudinaryUrl!,
+            coverImage: currentTrack.coverImage,
+            duration: currentTrack.duration,
+          }}
+          onClose={handleClosePlayer}
+          autoPlay={isPlaying}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
+          hasPrevious={currentTrackIndex > 0}
+          hasNext={playlist && currentTrackIndex < playlist.tracks.length - 1}
+          userInteracted={true}
+        />
+      ) : currentTrack ? (
         <MusicPlayer
           track={{
             id: currentTrack.trackId,
             title: currentTrack.title,
             user: {
-                name: currentTrack.artist,
-                id: "",
-                handle: ""
+              name: currentTrack.artist,
+              id: "",
+              handle: ""
             },
             artwork: {
               "150x150": currentTrack.coverImage || "/placeholder-album.png",
@@ -361,9 +403,9 @@ export default function PlaylistDetailPage() {
           hasPrevious={currentTrackIndex > 0}
           hasNext={playlist && currentTrackIndex < playlist.tracks.length - 1}
           userInteracted={true}
+          onError={handlePlayerError}
         />
-      )}
+      ) : null}
     </div>
   );
 }
-

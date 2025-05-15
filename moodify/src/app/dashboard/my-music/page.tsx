@@ -1,8 +1,6 @@
-
 // hackathon_may_stackup\moodify\src\app\dashboard\my-music\page.tsx
 
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -15,9 +13,12 @@ import {
   VolumeX,
   X,
   Trash2,
+  ListPlus,
+  Heart,
 } from "lucide-react";
 import AudioVisualizer from "@/app/components/AudioVisualizer";
 import LikeButton from "@/app/components/LikeButton";
+import MyMusicPlaylistSelector from "@/app/components/MyMusicPlaylistSelector";
 
 interface UploadedTrack {
   _id: string;
@@ -44,6 +45,10 @@ export default function MyMusic() {
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [playlistSelectorOpen, setPlaylistSelectorOpen] = useState(false);
+  const [selectedTrack, setSelectedTrack] = useState<UploadedTrack | null>(
+    null
+  );
 
   const handleDelete = async (trackId: string) => {
     if (
@@ -74,6 +79,11 @@ export default function MyMusic() {
         setIsDeleting(null);
       }
     }
+  };
+
+  const openPlaylistSelector = (track: UploadedTrack) => {
+    setSelectedTrack(track);
+    setPlaylistSelectorOpen(true);
   };
 
   useEffect(() => {
@@ -139,46 +149,40 @@ export default function MyMusic() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
-  const formatDate = (dateString: Date): string => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const handlePlay = (trackId: string, url: string) => {
     if (!audioRef.current) return;
-    
+
     setError(null);
-    
+
     if (currentlyPlaying === trackId) {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current
-          .play()
-          .catch((err) => {
-            console.error("Error playing audio:", err);
-            setError("Failed to play audio. Please check if the file format is supported.");
-          });
+        audioRef.current.play().catch((err) => {
+          console.error("Error playing audio:", err);
+          setError(
+            "Failed to play audio. Please check if the file format is supported."
+          );
+        });
       }
     } else {
       console.log("Attempting to play track from URL:", url);
-      
+
       const handleAudioError = () => {
         console.error("Audio error event triggered:", audioRef.current?.error);
-        setError("Failed to load audio. The file may be missing or in an unsupported format.");
+        setError(
+          "Failed to load audio. The file may be missing or in an unsupported format."
+        );
       };
-      
+
       audioRef.current.addEventListener("error", handleAudioError);
-      
+
       audioRef.current.src = url;
       audioRef.current.crossOrigin = "anonymous";
       audioRef.current.volume = isMuted ? 0 : volume;
-      
+
       audioRef.current.load();
-      
+
       setTimeout(() => {
         if (audioRef.current) {
           audioRef.current
@@ -188,15 +192,16 @@ export default function MyMusic() {
             })
             .catch((err) => {
               console.error("Error playing audio after load:", err);
-              setError("Failed to play audio. Please try another track or check your connection.");
+              setError(
+                "Failed to play audio. Please try another track or check your connection."
+              );
             });
         }
       }, 300);
-      
+
       setCurrentlyPlaying(trackId);
     }
   };
-  
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const seekTime = parseFloat(e.target.value);
@@ -280,13 +285,10 @@ export default function MyMusic() {
       ) : (
         <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
           <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 text-gray-400 text-sm font-medium">
-            <div className="col-span-6 md:col-span-4">Track</div>
-            <div className="hidden md:block md:col-span-2">Duration</div>
-            <div className="col-span-3 md:col-span-2">Genre</div>
-            <div className="col-span-3 md:col-span-2">Uploaded</div>
-            <div className="hidden md:block md:col-span-1">Play</div>
-            <div className="hidden md:block md:col-span-1">Like</div>
-            <div className="hidden md:block md:col-span-1">Delete</div>
+            <div className="col-span-5 md:col-span-5">Track</div>
+            <div className="col-span-2 md:col-span-2">Duration</div>
+            <div className="col-span-2 md:col-span-2">Genre</div>
+            <div className="col-span-3 md:col-span-3 text-center">Actions</div>
           </div>
           <div className="divide-y divide-gray-700">
             {tracks.map((track) => (
@@ -294,7 +296,7 @@ export default function MyMusic() {
                 key={track._id}
                 className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-700/50 transition-colors items-center"
               >
-                <div className="col-span-6 md:col-span-4 flex items-center space-x-3">
+                <div className="col-span-5 md:col-span-5 flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                     {track.coverImage ? (
                       <img
@@ -315,16 +317,13 @@ export default function MyMusic() {
                     </p>
                   </div>
                 </div>
-                <div className="hidden md:block md:col-span-2 text-gray-400">
+                <div className="col-span-2 md:col-span-2 text-gray-400">
                   {formatDuration(track.duration)}
                 </div>
-                <div className="col-span-3 md:col-span-2 text-gray-400 truncate">
+                <div className="col-span-2 md:col-span-2 text-gray-400 truncate">
                   {track.genre || "Unknown"}
                 </div>
-                <div className="col-span-3 md:col-span-2 text-gray-400 text-sm">
-                  {formatDate(track.uploadedAt)}
-                </div>
-                <div className="hidden md:flex md:col-span-1 justify-center">
+                <div className="col-span-3 md:col-span-3 flex items-center justify-center space-x-4">
                   <button
                     onClick={() => handlePlay(track._id, track.cloudinaryUrl)}
                     className="text-purple-400 hover:text-purple-300 transition-colors"
@@ -335,13 +334,12 @@ export default function MyMusic() {
                     }
                   >
                     {currentlyPlaying === track._id && isPlaying ? (
-                      <PauseCircle className="h-6 w-6" />
+                      <PauseCircle className="h-8 w-8" />
                     ) : (
-                      <PlayCircle className="h-6 w-6" />
+                      <PlayCircle className="h-8 w-8" />
                     )}
                   </button>
-                </div>
-                <div className="hidden md:flex md:col-span-1 justify-center">
+
                   <LikeButton
                     trackId={track._id}
                     title={track.title}
@@ -350,10 +348,18 @@ export default function MyMusic() {
                     duration={track.duration}
                     genre={track.genre}
                     mood={track.mood}
-                    cloudinaryUrl={track.cloudinaryUrl} 
+                    cloudinaryUrl={track.cloudinaryUrl}
+                    iconSize={30}
                   />
-                </div>
-                <div className="hidden md:flex md:col-span-1 justify-center">
+
+                  <button
+                    onClick={() => openPlaylistSelector(track)}
+                    className="text-gray-400 hover:text-purple-400 transition-colors"
+                    aria-label="Add to playlist"
+                  >
+                    <ListPlus className="h-8 w-8" />
+                  </button>
+
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -364,9 +370,9 @@ export default function MyMusic() {
                     disabled={isDeleting === track._id}
                   >
                     {isDeleting === track._id ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <Loader2 className="h-8 w-8 animate-spin" />
                     ) : (
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-8 w-8" />
                     )}
                   </button>
                 </div>
@@ -558,6 +564,14 @@ export default function MyMusic() {
             </div>
           </div>
         </div>
+      )}
+      {/* playlist selector modal is implemented here  */}
+      {selectedTrack && (
+        <MyMusicPlaylistSelector
+          isOpen={playlistSelectorOpen}
+          onClose={() => setPlaylistSelectorOpen(false)}
+          track={selectedTrack}
+        />
       )}
     </div>
   );
