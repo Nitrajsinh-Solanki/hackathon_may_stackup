@@ -73,7 +73,7 @@ export default function FilterBar({
         </button>
         
         {showGenreDropdown && (
-          <div className="absolute z-10 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {genres.map((genre) => (
               <button
                 key={genre}
@@ -106,7 +106,7 @@ export default function FilterBar({
         </button>
         
         {showMoodDropdown && (
-          <div className="absolute z-10 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-50 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
             {moods.map((mood) => (
               <button
                 key={mood}
@@ -139,7 +139,7 @@ export default function FilterBar({
         </button>
         
         {showSortDropdown && (
-          <div className="absolute z-10 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg">
+          <div className="absolute z-50 mt-2 w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg">
             {sortOptions.map((option) => (
               <button
                 key={option.value}

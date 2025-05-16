@@ -66,6 +66,11 @@ export interface CreatedPlaylist {
   updatedAt: Date;
 }
 
+export interface SearchHistory {
+  query: string;
+  timestamp: Date;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
@@ -76,10 +81,14 @@ export interface IUser extends mongoose.Document {
   savedPlaylists: SavedPlaylist[];
   savedAlbums: SavedAlbum[];
   createdPlaylists: CreatedPlaylist[];
+  searchHistory: SearchHistory[];
   createdAt: Date;
   updatedAt: Date;
+
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
+
+
 
 const uploadedTrackSchema = new mongoose.Schema({
   title: {
@@ -266,6 +275,19 @@ const createdPlaylistSchema = new mongoose.Schema({
   },
 });
 
+const searchHistorySchema = new mongoose.Schema({
+  query: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -296,6 +318,7 @@ const userSchema = new mongoose.Schema(
     savedPlaylists: [savedPlaylistSchema],
     savedAlbums: [savedAlbumSchema],
     createdPlaylists: [createdPlaylistSchema],
+    searchHistory: [searchHistorySchema],
   },
   {
     timestamps: true,
