@@ -1,12 +1,11 @@
 // hackathon_may_stackup\moodify\src\app\components\EnvironmentalRecommendations.tsx
 
 
-
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getWeatherData, WeatherData } from "@/lib/weather-api";
 import { Music, Cloud, Loader2 } from "lucide-react";
+import CloudinaryMusicPlayer from "./CloudinaryMusicPlayer";
 
 interface Song {
   title: string;
@@ -14,6 +13,18 @@ interface Song {
   jamendoId?: string;
   imageUrl?: string;
   audioUrl?: string;
+  found?: boolean;
+}
+
+interface CloudinaryTrack {
+  _id: string;
+  title: string;
+  artist?: string;
+  cloudinaryUrl: string;
+  coverImage?: string;
+  duration: number;
+  genre?: string;
+  mood?: string;
 }
 
 export default function EnvironmentalRecommendations() {
@@ -23,13 +34,15 @@ export default function EnvironmentalRecommendations() {
   const [timeOfDay, setTimeOfDay] = useState<string>("");
   const [recommendations, setRecommendations] = useState<Song[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState<number | null>(null);
+  const [userInteracted, setUserInteracted] = useState(false);
+  const playerRef = useRef<any>(null);
 
   // getting user's location and weather data
   useEffect(() => {
     async function getLocationAndWeather() {
       try {
         setLoading(true);
-
         // trying to get location using browser geolocation API
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
@@ -42,12 +55,10 @@ export default function EnvironmentalRecommendations() {
             },
             async (error) => {
               console.error("Geolocation error:", error);
-
               // fallback (in case browser don't support or access geolocation api ) to IP-based geolocation
               try {
                 const response = await fetch("/api/geolocation");
                 if (!response.ok) throw new Error("Failed to get IP location");
-
                 const data = await response.json();
                 const weather = await getWeatherData(
                   data.latitude,
@@ -68,7 +79,6 @@ export default function EnvironmentalRecommendations() {
           try {
             const response = await fetch("/api/geolocation");
             if (!response.ok) throw new Error("Failed to get IP location");
-
             const data = await response.json();
             const weather = await getWeatherData(data.latitude, data.longitude);
             setWeatherData(weather);
@@ -103,11 +113,9 @@ export default function EnvironmentalRecommendations() {
 
     getLocationAndWeather();
   }, []);
-
- 
- 
-    // getting music recommendations when weather data is available
-useEffect(() => {
+    
+  // getting music recommendations when weather data is available
+  useEffect(() => {
     async function getRecommendations() {
       if (!weatherData || !timeOfDay) return;
       try {
@@ -125,15 +133,15 @@ useEffect(() => {
             timeOfDay: timeOfDay,
           }),
         });
-        
+              
         if (!response.ok) {
           throw new Error("Failed to get recommendations");
         }
-        
+              
         const data = await response.json();
         const geminiRecommendations = data.recommendations;
-        
-        // using  the batch-search endpoint to get all songs at once
+              
+        // using the batch-search endpoint to get all songs at once
         const jamendoResponse = await fetch("/api/jamendo/batch-search", {
           method: "POST",
           headers: {
@@ -143,15 +151,15 @@ useEffect(() => {
             recommendations: geminiRecommendations,
           }),
         });
-        
+              
         if (!jamendoResponse.ok) {
           throw new Error("Failed to search Jamendo");
         }
-        
+              
         const jamendoData = await jamendoResponse.json();
-        
+              
         // filter out songs that weren't found on Jamendo api 
-        const validResults = jamendoData.results.filter((song: { found: any; }) => song.found);
+        const validResults = jamendoData.results.filter((song: { found: boolean }) => song.found);
         setRecommendations(validResults);
         setLoadingRecommendations(false);
       } catch (err) {
@@ -162,10 +170,44 @@ useEffect(() => {
         setLoadingRecommendations(false);
       }
     }
-    
+      
     getRecommendations();
   }, [weatherData, timeOfDay]);
-  
+
+  const handlePlaySong = (index: number) => {
+    setCurrentTrackIndex(index);
+    setUserInteracted(true);
+  };
+
+  const handleClosePlayer = () => {
+    setCurrentTrackIndex(null);
+  };
+
+  const handlePreviousSong = () => {
+    if (currentTrackIndex !== null && currentTrackIndex > 0) {
+      setCurrentTrackIndex(currentTrackIndex - 1);
+    }
+  };
+
+  const handleNextSong = () => {
+    if (currentTrackIndex !== null && currentTrackIndex < recommendations.length - 1) {
+      setCurrentTrackIndex(currentTrackIndex + 1);
+    }
+  };
+
+  // converting  Jamendo track to CloudinaryTrack format
+  const convertToCloudinaryTrack = (song: Song): CloudinaryTrack => {
+    return {
+      _id: song.jamendoId || `jamendo-${Math.random().toString(36).substr(2, 9)}`,
+      title: song.title,
+      artist: song.artist,
+      cloudinaryUrl: song.audioUrl || "",
+      coverImage: song.imageUrl,
+      duration: 0,
+      genre: "",
+      mood: "",
+    };
+  };
 
   if (loading) {
     return (
@@ -226,7 +268,8 @@ useEffect(() => {
             {recommendations.map((song, index) => (
               <div
                 key={index}
-                className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-purple-800 transition-all"
+                className="bg-gray-900 rounded-lg overflow-hidden border border-gray-800 hover:border-purple-800 transition-all cursor-pointer"
+                onClick={() => handlePlaySong(index)}
               >
                 <div className="aspect-square bg-gray-800 relative overflow-hidden">
                   {song.imageUrl ? (
@@ -240,6 +283,11 @@ useEffect(() => {
                       <Music className="h-12 w-12 text-purple-300/50" />
                     </div>
                   )}
+                  <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <button className="bg-purple-600 rounded-full p-3 transform hover:scale-110 transition-transform">
+                      <Music className="h-6 w-6 text-white" />
+                    </button>
+                  </div>
                 </div>
                 <div className="p-4">
                   <h4 className="font-medium text-white truncate">
@@ -248,15 +296,6 @@ useEffect(() => {
                   <p className="text-gray-400 text-sm truncate">
                     {song.artist}
                   </p>
-                  {song.audioUrl && (
-                    <div className="mt-3">
-                      <audio
-                        src={song.audioUrl}
-                        controls
-                        className="w-full h-8"
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
             ))}
@@ -270,6 +309,20 @@ useEffect(() => {
           </div>
         )}
       </div>
+
+      {currentTrackIndex !== null && recommendations[currentTrackIndex] && (
+        <CloudinaryMusicPlayer
+          ref={playerRef}
+          track={convertToCloudinaryTrack(recommendations[currentTrackIndex])}
+          onClose={handleClosePlayer}
+          autoPlay={true}
+          onPrevious={handlePreviousSong}
+          onNext={handleNextSong}
+          hasPrevious={currentTrackIndex > 0}
+          hasNext={currentTrackIndex < recommendations.length - 1}
+          userInteracted={userInteracted}
+        />
+      )}
     </div>
   );
 }
