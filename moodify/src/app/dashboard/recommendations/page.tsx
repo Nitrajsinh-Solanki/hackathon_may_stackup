@@ -1,16 +1,17 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\recommendation\page.tsx
 
 
-"use client";
 
+"use client";
 import { useState } from "react";
 import EnvironmentalRecommendations from "@/app/components/EnvironmentalRecommendations";
+import HistoryRecommendations from "@/app/components/HistoryRecommendations";
 
 export default function RecommendationsPage() {
   const [activeTab, setActiveTab] = useState("environmental");
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto pb-32">
       {/* tab Navigation */}
       <div className="flex border-b border-gray-700 mb-6">
         <button
@@ -34,19 +35,12 @@ export default function RecommendationsPage() {
           From Search History
         </button>
       </div>
-
+      
       {/* content area is here  */}
       {activeTab === "environmental" ? (
         <EnvironmentalRecommendations />
       ) : (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-6">
-          <h3 className="text-xl font-semibold text-white mb-4">
-            Search History Recommendations
-          </h3>
-          <p className="text-gray-300">
-            This section will be populated with recommendations based on your search history.
-          </p>
-        </div>
+        <HistoryRecommendations />
       )}
     </div>
   );

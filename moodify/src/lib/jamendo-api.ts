@@ -6,6 +6,7 @@ const JAMENDO_API_BASE = 'https://api.jamendo.com/v3.0';
 const JAMENDO_CLIENT_ID = process.env.NEXT_PUBLIC_JAMENDO_CLIENT_ID ;
 
 export interface JamendoTrack {
+  genre_name: string;
   id: string;
   name: string;
   artist_name: string;

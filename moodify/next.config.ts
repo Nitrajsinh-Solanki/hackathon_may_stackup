@@ -38,6 +38,27 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
       },
+        // adding Jamendo domains
+        {
+          protocol: 'https',
+          hostname: 'usercontent.jamendo.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'mp3l.jamendo.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'mp3d.jamendo.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'www.jamendo.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'storage.jamendo.com',
+        },
     ],
   },
 };
