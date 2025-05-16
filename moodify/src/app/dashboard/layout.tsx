@@ -1,7 +1,6 @@
 // moodify\src\app\dashboard\layout.tsx
 
 
-
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -13,6 +12,7 @@ import {
   User,
   LogOut,
   ListMusic,
+  ThumbsUp,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,7 +32,7 @@ export default function DashboardLayout({
       try {
         const response = await fetch("/api/auth/me", {
           method: "GET",
-          credentials:"include"
+          credentials: "include"
         });
         if (!response.ok) {
           throw new Error("Not authenticated");
@@ -46,6 +46,7 @@ export default function DashboardLayout({
         setIsLoading(false);
       }
     };
+
     checkAuth();
   }, [router]);
 
@@ -59,14 +60,15 @@ export default function DashboardLayout({
       setActivePage("library");
     } else if (pathname.includes("/profile")) {
       setActivePage("profile");
-    } else if (pathname.includes("/playlist-album") || pathname.includes("/album/")|| pathname.includes("/playlist/")) {
+    } else if (pathname.includes("/playlist-album") || pathname.includes("/album/") || pathname.includes("/playlist/")) {
       setActivePage("playlist-album");
+    } else if (pathname.includes("/recommendations")) {
+      setActivePage("recommendations");
     } else {
       setActivePage("home");
     }
   }, [pathname]);
   
-
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", {
@@ -88,6 +90,12 @@ export default function DashboardLayout({
 
   const navItems = [
     { id: "home", label: "Home", icon: <Home size={20} />, path: "/dashboard" },
+    {
+      id: "recommendations",
+      label: "Today's Recommendation",
+      icon: <ThumbsUp size={20} />,
+      path: "/dashboard/recommendations",
+    },
     {
       id: "upload",
       label: "Upload Music",
@@ -168,6 +176,7 @@ export default function DashboardLayout({
               {activePage === "playlist-album" && "Playlists & Albums"}
               {activePage === "library" && "My Library"}
               {activePage === "profile" && "My Profile"}
+              {activePage === "recommendations" && "Today's Recommendation"}
             </h2>
             {user && (
               <div className="flex items-center space-x-2">
