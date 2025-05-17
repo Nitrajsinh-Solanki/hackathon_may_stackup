@@ -2,6 +2,7 @@
 
 
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -13,6 +14,7 @@ import {
   LogOut,
   ListMusic,
   ThumbsUp,
+  MessageSquareText,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -64,6 +66,8 @@ export default function DashboardLayout({
       setActivePage("playlist-album");
     } else if (pathname.includes("/recommendations")) {
       setActivePage("recommendations");
+    } else if (pathname.includes("/music-chat")) {
+      setActivePage("music-chat");
     } else {
       setActivePage("home");
     }
@@ -119,6 +123,12 @@ export default function DashboardLayout({
       label: "Library",
       icon: <Library size={20} />,
       path: "/dashboard/library",
+    },
+    {
+      id: "music-chat",
+      label: "Music Q&A",
+      icon: <MessageSquareText size={20} />,
+      path: "/dashboard/music-chat",
     },
     {
       id: "profile",
@@ -177,6 +187,7 @@ export default function DashboardLayout({
               {activePage === "library" && "My Library"}
               {activePage === "profile" && "My Profile"}
               {activePage === "recommendations" && "Today's Recommendation"}
+              {activePage === "music-chat" && "Music Genius Q&A"}
             </h2>
             {user && (
               <div className="flex items-center space-x-2">
@@ -200,3 +211,4 @@ export default function DashboardLayout({
     </div>
   );
 }
+

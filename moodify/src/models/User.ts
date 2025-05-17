@@ -71,6 +71,18 @@ export interface SearchHistory {
   timestamp: Date;
 }
 
+export interface MusicChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
+
+export interface UserSummary {
+  summary: string;
+  generatedAt: Date;
+  dataHash: string;
+}
+
 export interface IUser extends mongoose.Document {
   username: string;
   email: string;
@@ -82,6 +94,8 @@ export interface IUser extends mongoose.Document {
   savedAlbums: SavedAlbum[];
   createdPlaylists: CreatedPlaylist[];
   searchHistory: SearchHistory[];
+  musicChatHistory: MusicChatMessage[];
+  userSummary?: UserSummary;
   createdAt: Date;
   updatedAt: Date;
 
@@ -288,6 +302,38 @@ const searchHistorySchema = new mongoose.Schema({
 });
 
 
+const musicChatMessageSchema = new mongoose.Schema({
+  role: {
+    type: String,
+    enum: ["user", "assistant"],
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const userSummarySchema = new mongoose.Schema({
+  summary: {
+    type: String,
+    required: true,
+  },
+  generatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  dataHash: {
+    type: String,
+    required: true,
+  },
+});
+
+
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -319,6 +365,8 @@ const userSchema = new mongoose.Schema(
     savedAlbums: [savedAlbumSchema],
     createdPlaylists: [createdPlaylistSchema],
     searchHistory: [searchHistorySchema],
+    musicChatHistory: [musicChatMessageSchema],
+    userSummary: userSummarySchema,
   },
   {
     timestamps: true,

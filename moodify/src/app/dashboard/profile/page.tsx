@@ -1,12 +1,13 @@
 // hackathon_may_stackup\moodify\src\app\dashboard\profile\page.tsx
 
-
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useUserData } from '@/app/hooks/useUserData';
 import ProfileDashboard from '@/app/components/ProfileDashboard';
 import UserDetails from '@/app/components/UserDetails';
 import ChangePassword from '@/app/components/ChangePassword';
+import UserSummary from '@/app/components/UserSummary';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs';
 
 export default function ProfilePage() {
@@ -65,15 +66,16 @@ export default function ProfilePage() {
     <div className="max-w-6xl mx-auto">
       <h1 className="text-3xl font-bold mb-8 text-white">My Profile</h1>
       
-      <Tabs 
-        defaultValue="dashboard" 
+      <Tabs
+        defaultValue="dashboard"
         className="w-full"
         onValueChange={(value) => setActiveTab(value)}
       >
-        <TabsList className="grid w-full grid-cols-3 mb-8">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="details">Account Details</TabsTrigger>
           <TabsTrigger value="password">Change Password</TabsTrigger>
+          <TabsTrigger value="personality">Music Personality</TabsTrigger>
         </TabsList>
         
         <TabsContent value="dashboard" className="mt-6">
@@ -87,7 +89,12 @@ export default function ProfilePage() {
         <TabsContent value="password" className="mt-6">
           <ChangePassword />
         </TabsContent>
+        
+        <TabsContent value="personality" className="mt-6">
+          <UserSummary />
+        </TabsContent>
       </Tabs>
     </div>
   );
 }
+
