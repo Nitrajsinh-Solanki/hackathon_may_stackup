@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@radix-ui/react-tabs": "^1.1.11",
     "bcryptjs": "^3.0.2",
+    "chart.js": "^4.4.9",
     "cloudinary": "^2.6.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "formidable": "^3.5.4",
     "jose": "^6.0.10",
@@ -22,8 +25,10 @@
     "next": "15.3.1",
     "nodemailer": "^7.0.2",
     "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",
-    "react-hot-toast": "^2.5.2"
+    "react-hot-toast": "^2.5.2",
+    "tailwind-merge": "^3.3.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

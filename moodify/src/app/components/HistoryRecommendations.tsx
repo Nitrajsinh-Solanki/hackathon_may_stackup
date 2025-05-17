@@ -174,7 +174,7 @@ export default function HistoryRecommendations() {
           </p>
           <div className="mt-6">
             <a 
-              href="/explore"
+              href="/dashboard"
               className="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
             >
               <Compass className="mr-2 h-4 w-4" />
