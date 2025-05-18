@@ -1,6 +1,5 @@
-
 // moodify\src\lib\mail.ts
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 interface EmailOptions {
   to: string;
@@ -9,14 +8,18 @@ interface EmailOptions {
 }
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
   },
 });
 
-export async function sendEmail({ to, subject, html }: EmailOptions): Promise<void> {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+}: EmailOptions): Promise<void> {
   try {
     await transporter.sendMail({
       from: `"Moodify" <${process.env.EMAIL_USER}>`,
@@ -26,8 +29,8 @@ export async function sendEmail({ to, subject, html }: EmailOptions): Promise<vo
     });
     console.log(`Email sent to ${to}`);
   } catch (error) {
-    console.error('Error sending email:', error);
-    throw new Error('Failed to send email');
+    console.error("Error sending email:", error);
+    throw new Error("Failed to send email");
   }
 }
 
@@ -63,11 +66,13 @@ export function generateOTPEmail(username: string, otp: string): string {
         </p>
         
         <div style="background-color: #2d2d2d; padding: 15px; border-radius: 8px; margin-top: 30px;">
-          <p style="color: #b0b0b0; margin: 0; font-size: 14px; line-height: 1.5;">
-            <strong style="color: #e2e2e2;">Need help?</strong> If you're having trouble with the verification process, please contact our support team at <a href="mailto:support@moodify.com" style="color: #a78bfa; text-decoration: none;">support@moodify.com</a>
-          </p>
-        </div>
-      </div>
+  <p style="color: #b0b0b0; margin: 0; font-size: 14px; line-height: 1.5;">
+    <strong style="color: #e2e2e2;">Need help?</strong> If you're having trouble with the verification process, please contact our support team at 
+    <a href="mailto:nrsolanki2005@gmail.com" style="color: #a78bfa; text-decoration: none;">nrsolanki2005@gmail.com</a> or 
+    <a href="mailto:amar.tiwari.8355@gmail.com" style="color: #a78bfa; text-decoration: none;">amar.tiwari.8355@gmail.com</a>.
+  </p>
+</div>
+
       
      
         
@@ -82,4 +87,3 @@ export function generateOTPEmail(username: string, otp: string): string {
     </div>
   `;
 }
-
