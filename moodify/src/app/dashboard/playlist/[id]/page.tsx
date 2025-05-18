@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   Clock,
@@ -34,6 +35,7 @@ export default function PlaylistDetailPage() {
   const [tracks, setTracks] = useState<DeezerTrack[]>([]);
   const [playableTracks, setPlayableTracks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   const [isLoadingPlayable, setIsLoadingPlayable] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentTrack, setCurrentTrack] = useState<any | null>(null);
@@ -190,6 +192,10 @@ export default function PlaylistDetailPage() {
     }
   };
 
+  const handleGoBack = () => {
+    router.push("/dashboard/playlist-album");
+  };
+
   const handleTrackPlay = async (trackId: number) => {
     const track = tracks.find((t) => t.id === trackId);
     if (!track) return;
@@ -325,6 +331,25 @@ export default function PlaylistDetailPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+       <button
+      onClick={handleGoBack}
+      className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      Go Back to Playlists
+    </button>
       <div className="flex flex-col md:flex-row gap-8 mb-8">
         <div className="flex-shrink-0">
           <div className="relative w-64 h-64 shadow-lg rounded-lg overflow-hidden">

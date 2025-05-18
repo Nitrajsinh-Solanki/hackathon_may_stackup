@@ -266,6 +266,11 @@ export default function AlbumDetailPage() {
     }
   };
 
+
+const handleGoBack = () => {
+  router.push("/dashboard/playlist-album");
+};
+
   const unsaveAlbum = async () => {
     if (!album) return;
 
@@ -319,6 +324,25 @@ export default function AlbumDetailPage() {
 
   return (
     <div className="container mx-auto">
+       <button
+      onClick={handleGoBack}
+      className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+    >
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="24" 
+        height="24" 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round"
+      >
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+      Go Back to Albums
+    </button>
       <div className="bg-gray-800/50 rounded-xl p-6 mb-8">
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-full md:w-64 flex-shrink-0">
