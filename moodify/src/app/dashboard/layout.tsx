@@ -2,7 +2,6 @@
 
 
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import {
@@ -15,6 +14,8 @@ import {
   ListMusic,
   ThumbsUp,
   MessageSquareText,
+  Menu,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -28,6 +29,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<{ username: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activePage, setActivePage] = useState("home");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -48,7 +50,6 @@ export default function DashboardLayout({
         setIsLoading(false);
       }
     };
-
     checkAuth();
   }, [router]);
 
@@ -71,6 +72,9 @@ export default function DashboardLayout({
     } else {
       setActivePage("home");
     }
+    
+    // close sidebar on mobile when navigating
+    setSidebarOpen(false);
   }, [pathname]);
   
   const handleLogout = async () => {
@@ -140,10 +144,30 @@ export default function DashboardLayout({
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gradient-to-br from-gray-900 via-black to-gray-800">
-      <aside className="w-64 bg-gray-900 border-r border-gray-800 fixed inset-y-0 left-0 z-20">
-        <div className="p-4 border-b border-gray-800 flex items-center justify-center md:justify-start">
+      {/* mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* sidebar for mobile and desktop */}
+      <aside 
+        className={`bg-gray-900 border-r border-gray-800 fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="p-4 border-b border-gray-800 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-purple-500">Moodify</h1>
+          <button 
+            className="text-gray-400 hover:text-white lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X size={24} />
+          </button>
         </div>
+        
         {/* navigation - with its own scrollbar if needed */}
         <div className="h-[calc(100vh-64px)] overflow-y-auto">
           <nav className="p-4">
@@ -176,19 +200,29 @@ export default function DashboardLayout({
           </nav>
         </div>
       </aside>
-      <div className="flex-1 ml-64 flex flex-col h-screen">
+
+      {/* main content area */}
+      <div className="flex-1 flex flex-col h-screen w-full lg:ml-64">
         <header className="bg-gray-900/80 backdrop-blur-sm border-b border-gray-800 p-4 sticky top-0 z-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-white">
-              {activePage === "home" && "Discover Music"}
-              {activePage === "upload" && "Upload Music"}
-              {activePage === "my-music" && "My Music"}
-              {activePage === "playlist-album" && "Playlists & Albums"}
-              {activePage === "library" && "My Library"}
-              {activePage === "profile" && "My Profile"}
-              {activePage === "recommendations" && "Today's Recommendation"}
-              {activePage === "music-chat" && "Music Genius Q&A"}
-            </h2>
+            <div className="flex items-center space-x-3">
+              <button 
+                className="text-white lg:hidden"
+                onClick={() => setSidebarOpen(true)}
+              >
+                <Menu size={24} />
+              </button>
+              <h2 className="text-xl font-semibold text-white truncate">
+                {activePage === "home" && "Discover Music"}
+                {activePage === "upload" && "Upload Music"}
+                {activePage === "my-music" && "My Music"}
+                {activePage === "playlist-album" && "Playlists & Albums"}
+                {activePage === "library" && "My Library"}
+                {activePage === "profile" && "My Profile"}
+                {activePage === "recommendations" && "Today's Recommendation"}
+                {activePage === "music-chat" && "Music Genius Q&A"}
+              </h2>
+            </div>
             {user && (
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center">
@@ -196,13 +230,14 @@ export default function DashboardLayout({
                     {user.username.charAt(0).toUpperCase()}
                   </span>
                 </div>
-                <span className="text-sm font-medium hidden md:inline-block">
+                <span className="text-sm font-medium hidden sm:inline-block">
                   {user.username}
                 </span>
               </div>
             )}
           </div>
         </header>
+        
         {/* scrollable Content Area */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 md:p-6">{children}</div>
@@ -211,4 +246,3 @@ export default function DashboardLayout({
     </div>
   );
 }
-
