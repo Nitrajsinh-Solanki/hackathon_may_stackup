@@ -228,43 +228,41 @@ export default function EnvironmentalRecommendations() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-7xl mx-auto px-4 sm:px-6">
       {weatherData && (
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 flex items-center">
-          <div className="mr-4">
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-center">
+          <div className="mb-2 sm:mb-0 sm:mr-4">
             <img
               src={`https://openweathermap.org/img/wn/${weatherData.icon}@2x.png`}
               alt={weatherData.condition}
-              className="w-16 h-16"
+              className="w-12 h-12 sm:w-16 sm:h-16"
             />
           </div>
-          <div>
-            <h3 className="text-xl font-semibold text-white">
+          <div className="text-center sm:text-left">
+            <h3 className="text-lg sm:text-xl font-semibold text-white">
               {weatherData.location}
             </h3>
-            <p className="text-gray-300">
+            <p className="text-sm sm:text-base text-gray-300">
               {weatherData.temperature}°C, {weatherData.condition} •{" "}
               {timeOfDay.charAt(0).toUpperCase() + timeOfDay.slice(1)}
             </p>
           </div>
         </div>
       )}
-
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6">
-        <h3 className="text-xl font-semibold text-white mb-4 flex items-center">
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center">
           <Cloud className="mr-2 h-5 w-5 text-purple-400" />
           Music for your current environment
         </h3>
-
         {loadingRecommendations ? (
-          <div className="flex flex-col items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
-            <p className="text-gray-400">
+          <div className="flex flex-col items-center justify-center p-4 sm:p-8">
+            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-purple-500 mb-3 sm:mb-4" />
+            <p className="text-sm sm:text-base text-gray-400 text-center">
               Finding the perfect songs for your mood...
             </p>
           </div>
         ) : recommendations.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {recommendations.map((song, index) => (
               <div
                 key={index}
@@ -280,20 +278,20 @@ export default function EnvironmentalRecommendations() {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-purple-900/30">
-                      <Music className="h-12 w-12 text-purple-300/50" />
+                      <Music className="h-8 w-8 sm:h-12 sm:w-12 text-purple-300/50" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 hover:opacity-100 flex items-center justify-center transition-opacity">
-                    <button className="bg-purple-600 rounded-full p-3 transform hover:scale-110 transition-transform">
-                      <Music className="h-6 w-6 text-white" />
+                    <button className="bg-purple-600 rounded-full p-2 sm:p-3 transform hover:scale-110 transition-transform">
+                      <Music className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                     </button>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h4 className="font-medium text-white truncate">
+                <div className="p-3 sm:p-4">
+                  <h4 className="font-medium text-white text-sm sm:text-base truncate">
                     {song.title}
                   </h4>
-                  <p className="text-gray-400 text-sm truncate">
+                  <p className="text-gray-400 text-xs sm:text-sm truncate">
                     {song.artist}
                   </p>
                 </div>
@@ -301,28 +299,30 @@ export default function EnvironmentalRecommendations() {
             ))}
           </div>
         ) : (
-          <div className="bg-gray-900/50 rounded-lg p-6 text-center">
-            <p className="text-gray-400">
+          <div className="bg-gray-900/50 rounded-lg p-4 sm:p-6 text-center">
+            <p className="text-sm sm:text-base text-gray-400">
               No matching songs found for your current environment. Please try
               again later.
             </p>
           </div>
         )}
       </div>
-
       {currentTrackIndex !== null && recommendations[currentTrackIndex] && (
-        <CloudinaryMusicPlayer
-          ref={playerRef}
-          track={convertToCloudinaryTrack(recommendations[currentTrackIndex])}
-          onClose={handleClosePlayer}
-          autoPlay={true}
-          onPrevious={handlePreviousSong}
-          onNext={handleNextSong}
-          hasPrevious={currentTrackIndex > 0}
-          hasNext={currentTrackIndex < recommendations.length - 1}
-          userInteracted={userInteracted}
-        />
+        <div className="fixed bottom-0 left-0 right-0 z-50">
+          <CloudinaryMusicPlayer
+            ref={playerRef}
+            track={convertToCloudinaryTrack(recommendations[currentTrackIndex])}
+            onClose={handleClosePlayer}
+            autoPlay={true}
+            onPrevious={handlePreviousSong}
+            onNext={handleNextSong}
+            hasPrevious={currentTrackIndex > 0}
+            hasNext={currentTrackIndex < recommendations.length - 1}
+            userInteracted={userInteracted}
+          />
+        </div>
       )}
     </div>
   );
+  
 }

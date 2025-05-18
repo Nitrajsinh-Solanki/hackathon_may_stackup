@@ -129,26 +129,34 @@ export default function TrackPage() {
     );
   }
   
+ 
+  
+    
   return (
-    <div className="pb-20">
+    <div className="pb-20 px-4 sm:px-6 md:px-8 max-w-7xl mx-auto">
       <button
         onClick={handleBack}
         className="flex items-center text-gray-400 hover:text-white mb-6"
       >
         <ArrowLeft size={20} className="mr-2" />
-        Back to Discovery
+        <span className="text-sm sm:text-base">Back to Discovery</span>
       </button>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 relative group">
-            <img
-              src={track.artwork['1000x1000'] || track.artwork['480x480'] || '/placeholder-album.png'}
-              alt={track.title}
-              className="w-full aspect-square object-cover"
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="lg:col-span-1">
+        <div className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 relative group max-w-xs sm:max-w-sm mx-auto lg:max-w-none">
+  <img
+    src={track.artwork['150x150'] || track.artwork['480x480'] || track.artwork['1000x1000'] || '/placeholder-album.png'}
+    alt={track.title}
+    className="w-full aspect-square object-cover"
+    srcSet={`
+      ${track.artwork['150x150'] || track.artwork['480x480']} 150w,
+      ${track.artwork['480x480'] || track.artwork['1000x1000']} 480w,
+      ${track.artwork['1000x1000'] || track.artwork['480x480']} 1000w
+    `}
+    sizes="(max-width: 640px) 150px, (max-width: 768px) 480px, 1000px"
+  />
             
-            {/* Play button overlay */}
             <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={handlePlayTrack}
@@ -159,86 +167,88 @@ export default function TrackPage() {
             </div>
           </div>
           
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2 justify-center lg:justify-start">
             <button
               onClick={handleLikeToggle}
               disabled={isLikeLoading}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-colors ${
+              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-full text-sm sm:text-base transition-colors ${
                 isLiked
                   ? 'bg-red-900/30 text-red-400 hover:bg-red-900/40'
                   : 'bg-gray-800 text-white hover:bg-gray-700'
               }`}
             >
-              <Heart size={18} className={isLiked ? 'fill-red-400' : ''} />
+              <Heart size={16} className={isLiked ? 'fill-red-400' : ''} />
               <span>{isLiked ? 'Liked' : 'Like'}</span>
             </button>
             
             <button
               onClick={handleAddToPlaylist}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full flex items-center"
+              className="bg-gray-800 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-full flex items-center text-sm sm:text-base"
             >
-              <ListPlus size={18} className="mr-2" />
-              Add to Playlist
+              <ListPlus size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Add to Playlist</span>
+              <span className="sm:hidden">Add</span>
             </button>
             
             <button
               onClick={handleDownload}
-              className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-full flex items-center"
+              className="bg-gray-800 hover:bg-gray-700 text-white px-3 sm:px-4 py-2 rounded-full flex items-center text-sm sm:text-base"
             >
-              <Download size={18} className="mr-2" />
-              Download
+              <Download size={16} className="mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Download</span>
+              <span className="sm:hidden">DL</span>
             </button>
           </div>
         </div>
         
-        {/* track Details */}
-        <div className="md:col-span-2">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{track.title}</h1>
-          <p className="text-purple-400 text-lg mb-4">{track.user.name}</p>
+        <div className="lg:col-span-2 mt-6 lg:mt-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2 text-center lg:text-left">{track.title}</h1>
+          <p className="text-purple-400 text-base sm:text-lg mb-4 text-center lg:text-left">{track.user.name}</p>
           
-          <div className="flex items-center space-x-4 text-sm text-gray-400 mb-6">
+          <div className="flex items-center justify-center lg:justify-start space-x-4 text-xs sm:text-sm text-gray-400 mb-6">
             <div className="flex items-center">
-              <Heart size={16} className="mr-1" />
+              <Heart size={14} className="mr-1" />
               <span>{track.favorite_count.toLocaleString()} likes</span>
             </div>
             <div className="flex items-center">
-              <Clock size={16} className="mr-1" />
+              <Clock size={14} className="mr-1" />
               <span>{formatDuration(track.duration)}</span>
             </div>
           </div>
           
           {track.genre && (
-            <div className="mb-4">
-              <span className="text-gray-400 text-sm">Genre: </span>
-              <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.genre}</span>
+            <div className="mb-4 text-center lg:text-left">
+              <span className="text-gray-400 text-xs sm:text-sm">Genre: </span>
+              <span className="bg-gray-800 text-white text-xs sm:text-sm px-3 py-1 rounded-full">{track.genre}</span>
             </div>
           )}
           
           {track.mood && (
-            <div className="mb-4">
-              <span className="text-gray-400 text-sm">Mood: </span>
-              <span className="bg-gray-800 text-white text-sm px-3 py-1 rounded-full">{track.mood}</span>
+            <div className="mb-4 text-center lg:text-left">
+              <span className="text-gray-400 text-xs sm:text-sm">Mood: </span>
+              <span className="bg-gray-800 text-white text-xs sm:text-sm px-3 py-1 rounded-full">{track.mood}</span>
             </div>
           )}
           
           {track.description && (
             <div className="mt-6">
-              <h3 className="text-white text-lg font-medium mb-2">Description</h3>
-              <p className="text-gray-400 whitespace-pre-line">{track.description}</p>
+              <h3 className="text-white text-base sm:text-lg font-medium mb-2 text-center lg:text-left">Description</h3>
+              <p className="text-gray-400 text-sm sm:text-base whitespace-pre-line">{track.description}</p>
             </div>
           )}
         </div>
       </div>
       
-      {track && showPlayer && (
-        <MusicPlayer
-          track={track}
-          onClose={() => setIsPlaying(false)}
-          autoPlay={isPlaying}
-        />
-      )}
-
-      {/* playlist selector modal */}
+      <div className={`fixed bottom-0 left-0 right-0 z-50 ${showPlayer ? 'block' : 'hidden'} md:block`}>
+        {track && showPlayer && (
+          <MusicPlayer
+            track={track}
+            onClose={() => setIsPlaying(false)}
+            autoPlay={isPlaying}
+          />
+        )}
+      </div>
+      
       {track && (
         <PlaylistSelector
           isOpen={showPlaylistSelector}
@@ -248,4 +258,7 @@ export default function TrackPage() {
       )}
     </div>
   );
-}
+  
+  }
+  
+

@@ -257,11 +257,11 @@ export default function MyMusic() {
 
   return (
     <div className="pb-20">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold text-white">My Music</h1>
         <button
           onClick={goToUpload}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md transition-colors w-full sm:w-auto"
         >
           Upload New Track
         </button>
@@ -284,19 +284,19 @@ export default function MyMusic() {
         </div>
       ) : (
         <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
-          <div className="grid grid-cols-12 gap-4 p-4 border-b border-gray-700 text-gray-400 text-sm font-medium">
-            <div className="col-span-5 md:col-span-5">Track</div>
-            <div className="col-span-2 md:col-span-2">Duration</div>
-            <div className="col-span-2 md:col-span-2">Genre</div>
-            <div className="col-span-3 md:col-span-3 text-center">Actions</div>
+          <div className="hidden sm:grid grid-cols-12 gap-4 p-4 border-b border-gray-700 text-gray-400 text-sm font-medium">
+            <div className="col-span-5">Track</div>
+            <div className="col-span-2">Duration</div>
+            <div className="col-span-2">Genre</div>
+            <div className="col-span-3 text-center">Actions</div>
           </div>
           <div className="divide-y divide-gray-700">
             {tracks.map((track) => (
               <div
                 key={track._id}
-                className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-700/50 transition-colors items-center"
+                className="grid grid-cols-1 sm:grid-cols-12 gap-4 p-4 hover:bg-gray-700/50 transition-colors items-center"
               >
-                <div className="col-span-5 md:col-span-5 flex items-center space-x-3">
+                <div className="col-span-1 sm:col-span-5 flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                     {track.coverImage ? (
                       <img
@@ -308,7 +308,7 @@ export default function MyMusic() {
                       <Music className="h-5 w-5 text-gray-400" />
                     )}
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h3 className="text-white font-medium truncate">
                       {track.title}
                     </h3>
@@ -317,13 +317,20 @@ export default function MyMusic() {
                     </p>
                   </div>
                 </div>
-                <div className="col-span-2 md:col-span-2 text-gray-400">
+                
+                <div className="hidden sm:block col-span-2 text-gray-400">
                   {formatDuration(track.duration)}
                 </div>
-                <div className="col-span-2 md:col-span-2 text-gray-400 truncate">
+                <div className="hidden sm:block col-span-2 text-gray-400 truncate">
                   {track.genre || "Unknown"}
                 </div>
-                <div className="col-span-3 md:col-span-3 flex items-center justify-center space-x-4">
+                
+                <div className="flex sm:hidden justify-between items-center mt-2 text-sm text-gray-400">
+                  <span>{formatDuration(track.duration)}</span>
+                  <span>{track.genre || "Unknown"}</span>
+                </div>
+                
+                <div className="col-span-1 sm:col-span-3 flex items-center justify-end sm:justify-center space-x-3 mt-3 sm:mt-0">
                   <button
                     onClick={() => handlePlay(track._id, track.cloudinaryUrl)}
                     className="text-purple-400 hover:text-purple-300 transition-colors"
@@ -334,12 +341,11 @@ export default function MyMusic() {
                     }
                   >
                     {currentlyPlaying === track._id && isPlaying ? (
-                      <PauseCircle className="h-8 w-8" />
+                      <PauseCircle className="h-7 w-7 sm:h-8 sm:w-8" />
                     ) : (
-                      <PlayCircle className="h-8 w-8" />
+                      <PlayCircle className="h-7 w-7 sm:h-8 sm:w-8" />
                     )}
                   </button>
-
                   <LikeButton
                     trackId={track._id}
                     title={track.title}
@@ -349,17 +355,15 @@ export default function MyMusic() {
                     genre={track.genre}
                     mood={track.mood}
                     cloudinaryUrl={track.cloudinaryUrl}
-                    iconSize={30}
+                    iconSize={24}
                   />
-
                   <button
                     onClick={() => openPlaylistSelector(track)}
                     className="text-gray-400 hover:text-purple-400 transition-colors"
                     aria-label="Add to playlist"
                   >
-                    <ListPlus className="h-8 w-8" />
+                    <ListPlus className="h-7 w-7 sm:h-8 sm:w-8" />
                   </button>
-
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -370,9 +374,9 @@ export default function MyMusic() {
                     disabled={isDeleting === track._id}
                   >
                     {isDeleting === track._id ? (
-                      <Loader2 className="h-8 w-8 animate-spin" />
+                      <Loader2 className="h-7 w-7 sm:h-8 sm:w-8 animate-spin" />
                     ) : (
-                      <Trash2 className="h-8 w-8" />
+                      <Trash2 className="h-7 w-7 sm:h-8 sm:w-8" />
                     )}
                   </button>
                 </div>
@@ -381,16 +385,17 @@ export default function MyMusic() {
           </div>
         </div>
       )}
-      {/* audio player with visualizer is implemented here  */}
+      
+      {/* audio player with visualizer */}
       {currentlyPlaying && (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50 hidden sm:block">
           <div className="max-w-7xl mx-auto">
-            {/* visualizer is implemented here  */}
+            {/* visualizer */}
             <div className="mb-4">
               <AudioVisualizer audioRef={audioRef} />
             </div>
-            <div className="flex items-center justify-between">
-              {/* track  Info */}
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-4">
+              {/* track Info */}
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-gray-700 rounded flex items-center justify-center flex-shrink-0">
                   {currentTrack?.coverImage ? (
@@ -404,16 +409,17 @@ export default function MyMusic() {
                   )}
                 </div>
                 <div>
-                  <h4 className="text-white font-medium truncate max-w-[200px]">
+                  <h4 className="text-white font-medium truncate max-w-[150px] md:max-w-[200px]">
                     {currentTrack?.title}
                   </h4>
-                  <p className="text-gray-400 text-sm truncate max-w-[200px]">
+                  <p className="text-gray-400 text-sm truncate max-w-[150px] md:max-w-[200px]">
                     {currentTrack?.artist}
                   </p>
                 </div>
               </div>
-              {/* player Controls */}
-              <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4">
+              
+              {/* player controls */}
+              <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4 w-full">
                 <div className="flex items-center space-x-4">
                   <button
                     className="text-gray-400 hover:text-white"
@@ -471,6 +477,7 @@ export default function MyMusic() {
                   </span>
                 </div>
               </div>
+              
               <div className="flex items-center space-x-2">
                 <button
                   onClick={toggleMute}
@@ -504,8 +511,10 @@ export default function MyMusic() {
           </div>
         </div>
       )}
+      
+      {/* mobile player */}
       {currentlyPlaying && (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 md:hidden">
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 sm:hidden">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <button
@@ -530,13 +539,13 @@ export default function MyMusic() {
                   <PlayCircle className="h-8 w-8" />
                 )}
               </button>
-              <div>
-                <p className="text-white font-medium">{currentTrack?.title}</p>
-                <p className="text-gray-400 text-sm">{currentTrack?.artist}</p>
+              <div className="max-w-[120px]">
+                <p className="text-white font-medium truncate">{currentTrack?.title}</p>
+                <p className="text-gray-400 text-sm truncate">{currentTrack?.artist}</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              {/* adding like button here */}
+              {/* adding like button is implemented here */}
               {currentTrack && (
                 <LikeButton
                   trackId={currentTrack._id}
@@ -563,9 +572,26 @@ export default function MyMusic() {
               </button>
             </div>
           </div>
+          
+          {/* mobile progress bar */}
+          <div className="mt-2">
+            <input
+              type="range"
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              onChange={handleSeek}
+              className="w-full h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <span>{formatDuration(currentTime)}</span>
+              <span>{formatDuration(duration)}</span>
+            </div>
+          </div>
         </div>
       )}
-      {/* playlist selector modal is implemented here  */}
+      
+      {/* playlist selector modal */}
       {selectedTrack && (
         <MyMusicPlaylistSelector
           isOpen={playlistSelectorOpen}
@@ -575,4 +601,5 @@ export default function MyMusic() {
       )}
     </div>
   );
+  
 }

@@ -38,72 +38,72 @@ export default function LibraryPage() {
   };
 
   return (
-    <div className="w-full">
-      {/* horizontal navigation is implemented here */}
-      <div className="mb-8 border-b border-gray-800 overflow-x-auto">
-        <div className="flex space-x-2 min-w-max">
+    <div className="w-full px-2 md:px-4">
+      {/* horizontal navigation */}
+      <div className="mb-4 md:mb-8 border-b border-gray-800 overflow-x-auto pb-1">
+        <div className="flex space-x-1 md:space-x-2 min-w-max">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               data-tab={tab.id}
               onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-3 transition-colors ${
+              className={`flex items-center space-x-1 md:space-x-2 px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm transition-colors ${
                 activeTab === tab.id
                   ? "text-purple-500 border-b-2 border-purple-500"
                   : "text-gray-400 hover:text-white"
               }`}
             >
               {tab.icon}
-              <span>{tab.label}</span>
+              <span className="whitespace-nowrap">{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
       
       {/* refresh button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-2 md:mb-4">
         <button 
           onClick={forceRefresh}
-          className="flex items-center space-x-1 text-sm text-gray-400 hover:text-white bg-gray-800/50 px-3 py-1 rounded-full"
+          className="flex items-center space-x-1 text-xs md:text-sm text-gray-400 hover:text-white bg-gray-800/50 px-2 md:px-3 py-1 rounded-full"
         >
-          <RefreshCw size={14} />
+          <RefreshCw size={12} className="md:w-4 md:h-4" />
           <span>Refresh</span>
         </button>
       </div>
       
       {/* content Area */}
-      <div className="mt-6">
+      <div className="mt-4 md:mt-6">
         {activeTab === "liked" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Your Liked Music</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Your Liked Music</h2>
             <LikedMusicList key={`liked-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "saved-playlists" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Your Saved Playlists</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Your Saved Playlists</h2>
             <SavedPlaylistsList key={`playlists-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "saved-albums" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Your Saved Albums</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Your Saved Albums</h2>
             <SavedAlbumsList key={`albums-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "created-playlists" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Your Created Playlists</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Your Created Playlists</h2>
             <CreatedPlaylistsList key={`created-playlists-${refreshKey}`} />
           </div>
         )}
         
         {activeTab === "create-playlist" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Create a New Playlist</h2>
+            <h2 className="text-lg md:text-xl font-semibold mb-2 md:mb-4">Create a New Playlist</h2>
             <CreatePlaylistForm onSuccess={() => {
               forceRefresh();
               setActiveTab("created-playlists");
@@ -113,4 +113,7 @@ export default function LibraryPage() {
       </div>
     </div>
   );
+  
+
+
 }

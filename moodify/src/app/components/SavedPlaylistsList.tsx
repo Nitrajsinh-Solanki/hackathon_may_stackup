@@ -112,7 +112,7 @@ export default function SavedPlaylistsList() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+    <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
       {playlists.map((playlist) => (
         <div key={playlist.playlistId} className="relative group">
           <Link
@@ -125,22 +125,23 @@ export default function SavedPlaylistsList() {
                   src={playlist.coverImage}
                   alt={playlist.title}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
                   className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                  <Music size={40} className="text-gray-500" />
+                  <Music size={30} className="text-gray-500" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-4">
-                <div className="bg-purple-600 rounded-full p-3 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                  <Music size={20} className="text-white" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-2 sm:p-3 md:p-4">
+                <div className="bg-purple-600 rounded-full p-2 sm:p-3 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <Music size={16} className="text-white" />
                 </div>
               </div>
             </div>
-            <div className="p-4">
-              <h3 className="text-white font-medium truncate">{playlist.title}</h3>
-              <p className="text-gray-400 text-sm mt-1 truncate">
+            <div className="p-2 sm:p-3 md:p-4">
+              <h3 className="text-white text-sm sm:text-base font-medium truncate">{playlist.title}</h3>
+              <p className="text-gray-400 text-xs sm:text-sm mt-1 truncate">
                 {playlist.trackCount} tracks • {playlist.creator || "Unknown"}
               </p>
             </div>
@@ -150,17 +151,21 @@ export default function SavedPlaylistsList() {
           <button
             onClick={(e) => handleUnsavePlaylist(e, playlist.playlistId)}
             disabled={unsavingPlaylistId === playlist.playlistId}
-            className="absolute top-3 right-3 bg-black/70 hover:bg-black/90 p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 cursor-pointer hover:scale-110"
+            className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 hover:bg-black/90 p-2 sm:p-3 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 cursor-pointer hover:scale-110 touch-action-manipulation"
             title="Unsave playlist"
           >
             {unsavingPlaylistId === playlist.playlistId ? (
-              <Loader size={22} className="animate-spin text-red-400" />
+              <Loader size={16} className="animate-spin text-red-400" />
             ) : (
-              <BookmarkX size={22} className="text-red-400" />
+              <BookmarkX size={16} className="text-red-400" />
             )}
           </button>
         </div>
       ))}
     </div>
   );
+  
+
+
+
 }

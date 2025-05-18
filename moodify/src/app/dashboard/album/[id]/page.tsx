@@ -323,29 +323,30 @@ const handleGoBack = () => {
   }
 
   return (
-    <div className="container mx-auto">
-       <button
-      onClick={handleGoBack}
-      className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-    >
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
+    <div className="container mx-auto px-4">
+      <button
+        onClick={handleGoBack}
+        className="mb-4 md:mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm md:text-base"
       >
-        <path d="m15 18-6-6 6-6"/>
-      </svg>
-      Go Back to Albums
-    </button>
-      <div className="bg-gray-800/50 rounded-xl p-6 mb-8">
-        <div className="flex flex-col md:flex-row gap-6">
-          <div className="w-full md:w-64 flex-shrink-0">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Go Back to Albums
+      </button>
+      
+      <div className="bg-gray-800/50 rounded-xl p-4 md:p-6 mb-6 md:mb-8">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+          <div className="w-full md:w-48 lg:w-64 flex-shrink-0 mx-auto md:mx-0">
             <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
               {album.strAlbumThumb ? (
                 <Image
@@ -356,7 +357,7 @@ const handleGoBack = () => {
                 />
               ) : (
                 <div className="w-full h-full bg-gray-700 flex items-center justify-center">
-                  <Disc size={64} className="text-gray-500" />
+                  <Disc size={48} className="text-gray-500" />
                 </div>
               )}
             </div>
@@ -364,31 +365,31 @@ const handleGoBack = () => {
           <div className="flex-1">
             <div className="flex flex-col h-full justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2 text-center md:text-left">
                   {album.strAlbum}
                 </h1>
-                <div className="flex items-center text-gray-400 mb-4">
+                <div className="flex flex-wrap items-center justify-center md:justify-start text-gray-400 mb-4 text-sm md:text-base gap-2 md:gap-4">
                   {album.strArtist && (
-                    <div className="flex items-center mr-4">
-                      <User size={16} className="mr-1" />
+                    <div className="flex items-center">
+                      <User size={14} className="mr-1" />
                       <span>{album.strArtist}</span>
                     </div>
                   )}
                   {album.intYearReleased && (
-                    <div className="flex items-center mr-4">
-                      <Calendar size={16} className="mr-1" />
+                    <div className="flex items-center">
+                      <Calendar size={14} className="mr-1" />
                       <span>{album.intYearReleased}</span>
                     </div>
                   )}
                   {tracks.length > 0 && (
-                    <div className="flex items-center mr-4">
-                      <Music size={16} className="mr-1" />
+                    <div className="flex items-center">
+                      <Music size={14} className="mr-1" />
                       <span>{tracks.length} tracks</span>
                     </div>
                   )}
                 </div>
                 {album.strGenre && (
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 justify-center md:justify-start">
                     <span className="bg-purple-900/40 text-purple-200 text-xs px-2 py-1 rounded-full">
                       {album.strGenre}
                     </span>
@@ -400,29 +401,28 @@ const handleGoBack = () => {
                   </div>
                 )}
                 {album.strDescriptionEN && (
-                  <div className="text-gray-400 text-sm mb-4 line-clamp-4">
+                  <div className="text-gray-400 text-xs md:text-sm mb-4 line-clamp-3 md:line-clamp-4">
                     {album.strDescriptionEN}
                   </div>
                 )}
               </div>
-              <div className="flex flex-wrap gap-3 mt-4">
+              <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
                 <button
                   onClick={() => tracks.length > 0 && playTrack(0)}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-full flex items-center justify-center"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 md:px-6 rounded-full flex items-center justify-center text-sm md:text-base"
                   disabled={tracks.length === 0 || isSearchingAudio}
                 >
                   {isSearchingAudio ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                   ) : (
-                    <Play size={20} fill="white" className="mr-2" />
+                    <Play size={16} fill="white" className="mr-2" />
                   )}
                   Play Album
                 </button>
-
                 <button
                   onClick={isSaved ? unsaveAlbum : saveAlbum}
                   disabled={isSaving || isUnsaving}
-                  className={`font-medium py-2 px-6 rounded-full flex items-center justify-center ${
+                  className={`font-medium py-2 px-4 md:px-6 rounded-full flex items-center justify-center text-sm md:text-base ${
                     isSaved
                       ? "bg-green-600/20 text-green-300 border border-green-600/30 hover:bg-red-600/20 hover:text-red-300 hover:border-red-600/30"
                       : "bg-gray-700 hover:bg-gray-600 text-white"
@@ -432,12 +432,12 @@ const handleGoBack = () => {
                     <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
                   ) : isSaved ? (
                     <>
-                      <BookmarkMinus size={20} className="mr-2" />
+                      <BookmarkMinus size={16} className="mr-2" />
                       Saved
                     </>
                   ) : (
                     <>
-                      <BookmarkPlus size={20} className="mr-2" />
+                      <BookmarkPlus size={16} className="mr-2" />
                       Save Album
                     </>
                   )}
@@ -447,13 +447,13 @@ const handleGoBack = () => {
           </div>
         </div>
       </div>
-
+      
       {currentTrackIndex !== null && (
-        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-2 md:p-4 z-50">
           <div className="container mx-auto">
             <div
               ref={progressBarRef}
-              className="w-full h-1 bg-gray-700 rounded-full mb-3 cursor-pointer"
+              className="w-full h-1 bg-gray-700 rounded-full mb-2 md:mb-3 cursor-pointer"
               onClick={handleProgressBarClick}
             >
               <div
@@ -466,7 +466,7 @@ const handleGoBack = () => {
               ></div>
             </div>
             <div className="flex items-center">
-              <div className="w-16 h-16 relative mr-4 flex-shrink-0">
+              <div className="w-10 h-10 md:w-16 md:h-16 relative mr-2 md:mr-4 flex-shrink-0">
                 {album.strAlbumThumb ? (
                   <Image
                     src={album.strAlbumThumb}
@@ -476,15 +476,15 @@ const handleGoBack = () => {
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-800 flex items-center justify-center rounded">
-                    <Music size={24} className="text-gray-500" />
+                    <Music size={16} className="text-gray-500" />
                   </div>
                 )}
               </div>
-              <div className="flex-1 mr-4">
-                <div className="text-white font-medium truncate">
+              <div className="flex-1 mr-2 md:mr-4 overflow-hidden">
+                <div className="text-white font-medium truncate text-sm md:text-base">
                   {tracks[currentTrackIndex]?.strTrack || "Unknown Track"}
                 </div>
-                <div className="text-gray-400 text-sm truncate">
+                <div className="text-gray-400 text-xs md:text-sm truncate">
                   {tracks[currentTrackIndex]?.strArtist ||
                     album.strArtist ||
                     "Unknown Artist"}
@@ -493,29 +493,29 @@ const handleGoBack = () => {
                   <div className="text-red-400 text-xs mt-1">{audioError}</div>
                 )}
               </div>
-              <div className="text-gray-400 text-sm mr-4 hidden md:block">
+              <div className="text-gray-400 text-xs mr-2 md:mr-4 hidden sm:block">
                 {formatDuration(Math.floor(currentTime * 1000))} /{" "}
                 {formatDuration(Math.floor(duration * 1000))}
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 md:space-x-4">
                 <button
                   onClick={playPrevious}
                   disabled={currentTrackIndex === 0 || isSearchingAudio}
                   className="text-gray-400 hover:text-white disabled:opacity-50"
                 >
-                  <SkipBack size={24} />
+                  <SkipBack size={20} />
                 </button>
                 <button
                   onClick={togglePlayPause}
                   disabled={isSearchingAudio}
-                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-2 flex items-center justify-center"
+                  className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-1 md:p-2 flex items-center justify-center"
                 >
                   {isSearchingAudio ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-t-2 border-b-2 border-white"></div>
                   ) : isPlaying ? (
-                    <Pause size={24} />
+                    <Pause size={20} />
                   ) : (
-                    <Play size={24} fill="currentColor" />
+                    <Play size={20} fill="currentColor" />
                   )}
                 </button>
                 <button
@@ -525,30 +525,30 @@ const handleGoBack = () => {
                   }
                   className="text-gray-400 hover:text-white disabled:opacity-50"
                 >
-                  <SkipForward size={24} />
+                  <SkipForward size={20} />
                 </button>
-                <div className="text-gray-400 ml-4 flex items-center">
-                  <Volume2 size={20} className="mr-2" />
+                <div className="text-gray-400 ml-2 md:ml-4 hidden sm:flex items-center">
+                  <Volume2 size={16} className="mr-1" />
                 </div>
               </div>
             </div>
           </div>
         </div>
       )}
-
-      <div className="bg-gray-900/50 rounded-xl p-6 mb-24">
-        <h2 className="text-xl font-semibold text-white mb-4">Tracks</h2>
+      
+      <div className="bg-gray-900/50 rounded-xl p-4 md:p-6 mb-24">
+        <h2 className="text-lg md:text-xl font-semibold text-white mb-4">Tracks</h2>
         {tracks.length > 0 ? (
           <div className="divide-y divide-gray-800">
             {tracks.map((track, index) => (
               <div
                 key={track.idTrack}
-                className={`py-3 px-2 flex items-center hover:bg-gray-800/50 rounded cursor-pointer ${
+                className={`py-2 md:py-3 px-2 flex items-center hover:bg-gray-800/50 rounded cursor-pointer ${
                   currentTrackIndex === index ? "bg-purple-900/20" : ""
                 }`}
                 onClick={() => playTrack(index)}
               >
-                <div className="w-8 text-center text-gray-500 mr-4">
+                <div className="w-6 md:w-8 text-center text-gray-500 mr-2 md:mr-4">
                   {currentTrackIndex === index ? (
                     <button
                       onClick={(e) => {
@@ -558,35 +558,24 @@ const handleGoBack = () => {
                       disabled={isSearchingAudio}
                     >
                       {isSearchingAudio ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
+                        <div className="animate-spin rounded-full h-3 w-3 md:h-4 md:w-4 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
                       ) : isPlaying ? (
-                        <Pause size={18} className="text-purple-400" />
+                        <Pause size={14} className="text-purple-400" />
                       ) : (
                         <Play
-                          size={18}
+                          size={14}
                           fill="currentColor"
                           className="text-purple-400"
                         />
                       )}
                     </button>
                   ) : (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playTrack(index);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 hover:text-white transition-opacity"
-                    >
-                      <Play size={18} fill="currentColor" />
-                    </button>
+                    <span className="text-xs md:text-sm">{track.intTrackNumber || index + 1}</span>
                   )}
                 </div>
-                <div className="w-8 text-center text-gray-500 mr-4">
-                  {track.intTrackNumber || index + 1}
-                </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div
-                    className={`font-medium ${
+                    className={`font-medium truncate text-sm md:text-base ${
                       currentTrackIndex === index
                         ? "text-purple-400"
                         : "text-white"
@@ -595,12 +584,12 @@ const handleGoBack = () => {
                     {track.strTrack}
                   </div>
                   {track.strArtist && (
-                    <div className="text-sm text-gray-400">
+                    <div className="text-xs md:text-sm text-gray-400 truncate">
                       {track.strArtist}
                     </div>
                   )}
                 </div>
-                <div className="text-gray-500 text-sm">
+                <div className="text-gray-500 text-xs md:text-sm ml-2">
                   {track.intDuration
                     ? formatDuration(parseInt(track.intDuration))
                     : ""}
@@ -609,11 +598,14 @@ const handleGoBack = () => {
             ))}
           </div>
         ) : (
-          <div className="text-gray-400 text-center py-8">
+          <div className="text-gray-400 text-center py-6 md:py-8 text-sm md:text-base">
             No tracks available for this album
           </div>
         )}
       </div>
     </div>
   );
+
+
+  
 }

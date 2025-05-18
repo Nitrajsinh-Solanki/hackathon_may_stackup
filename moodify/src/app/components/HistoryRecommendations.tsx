@@ -187,80 +187,84 @@ export default function HistoryRecommendations() {
   }
 
   return (
-    <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 mb-24">
-      <h3 className="text-xl font-semibold text-white mb-4">
-        Personalized For You
-      </h3>
-      
-      {tracks.length === 0 ? (
-        <div className="text-center py-10">
-          <div className="mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-            </svg>
+    <>
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6">
+        <h3 className="text-lg sm:text-xl font-semibold text-white mb-4">
+          Personalized For You
+        </h3>
+              
+        {tracks.length === 0 ? (
+          <div className="text-center py-6 sm:py-10">
+            <div className="mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 sm:h-16 sm:w-16 mx-auto text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <p className="text-gray-300 text-base sm:text-lg">
+              We couldn't find any playable tracks based on your history.
+            </p>
+            <p className="text-gray-400 text-sm sm:text-base mt-2">
+              Try liking more tracks or creating playlists to improve recommendations.
+            </p>
           </div>
-          <p className="text-gray-300 text-lg">
-            We couldn't find any playable tracks based on your history.
-          </p>
-          <p className="text-gray-400 mt-2">
-            Try liking more tracks or creating playlists to improve recommendations.
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {tracks.map((track, index) => (
-            <div 
-              key={track.id}
-              className="bg-gray-700/50 rounded-lg overflow-hidden hover:bg-gray-700 transition cursor-pointer group"
-              onClick={() => handlePlayTrack(index)}
-            >
-              <div className="relative h-48 w-full">
-                <Image
-                  src={track.image || '/placeholder-album.png'}
-                  alt={track.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <div className="bg-purple-600 rounded-full p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5">
+            {tracks.map((track, index) => (
+              <div 
+                key={track.id}
+                className="bg-gray-700/50 rounded-lg overflow-hidden hover:bg-gray-700 transition cursor-pointer group"
+                onClick={() => handlePlayTrack(index)}
+              >
+                <div className="relative h-36 sm:h-48 w-full">
+                  <Image
+                    src={track.image || '/placeholder-album.png'}
+                    alt={track.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div className="bg-purple-600 rounded-full p-2 sm:p-3 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
+                <div className="p-3 sm:p-4">
+                  <h4 className="text-white text-sm sm:text-base font-medium truncate">{track.name}</h4>
+                  <p className="text-gray-400 text-xs sm:text-sm truncate mt-1">{track.artist_name}</p>
+                  {track.album_name && (
+                    <p className="text-gray-500 text-xs mt-1 sm:mt-2 truncate">
+                      Album: {track.album_name}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="p-4">
-                <h4 className="text-white font-medium truncate">{track.name}</h4>
-                <p className="text-gray-400 text-sm truncate mt-1">{track.artist_name}</p>
-                {track.album_name && (
-                  <p className="text-gray-500 text-xs mt-2 truncate">
-                    Album: {track.album_name}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        )}
+      </div>
+  
+      {currentTrackIndex !== null && tracks[currentTrackIndex] && (
+        <div className="fixed bottom-0 left-0 right-0 z-[100] bg-gray-900 border-t border-gray-700 w-full">
+          <CloudinaryMusicPlayer
+            ref={playerRef}
+            track={convertToCloudinaryTrack(tracks[currentTrackIndex])}
+            onClose={handleClosePlayer}
+            autoPlay={true}
+            onPrevious={handlePreviousTrack}
+            onNext={handleNextTrack}
+            hasPrevious={currentTrackIndex > 0}
+            hasNext={currentTrackIndex < tracks.length - 1}
+            userInteracted={userInteracted}
+          />
         </div>
       )}
-      
-      {currentTrackIndex !== null && tracks[currentTrackIndex] && (
-  <div className="fixed bottom-0 left-0 right-0 z-50 bg-gray-900 border-t border-gray-700">
-    <CloudinaryMusicPlayer
-      ref={playerRef}
-      track={convertToCloudinaryTrack(tracks[currentTrackIndex])}
-      onClose={handleClosePlayer}
-      autoPlay={true}
-      onPrevious={handlePreviousTrack}
-      onNext={handleNextTrack}
-      hasPrevious={currentTrackIndex > 0}
-      hasNext={currentTrackIndex < tracks.length - 1}
-      userInteracted={userInteracted}
-    />
-  </div>
-)}
-
-    </div>
+    </>
   );
+  
+  
+  
 }
