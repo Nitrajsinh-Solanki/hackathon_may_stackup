@@ -99,7 +99,7 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 ### 🧩 Need help setting these up?
 
 * 🔗 **MongoDB URI**:
-  Get it from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) after setting up a free cluster.
+  Get it from [MongoDB Atlas](https://account.mongodb.com/account/login) after setting up a free cluster.
   📽️ [Video tutorial](https://youtu.be/SMXbGrKe5gM?feature=shared)
 
 * 📧 **Email credentials for Nodemailer**:
@@ -111,16 +111,16 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
   [JWT Generator](https://www.javainuse.com/jwtgenerator)
 
 * ☁️ **Cloudinary credentials**:
-  Create an account and get your API keys from your [Cloudinary dashboard](https://cloudinary.com/)
+  Create an account and get your API keys from your [Cloudinary dashboard](https://cloudinary.com/users/login)
 
 * 🎶 **Jamendo API Key**:
-  Sign up as a developer and create an app at [Jamendo Developer Portal](https://developer.jamendo.com/v3.0)
+  Sign up as a developer and create an app at [Jamendo Developer Portal](https://devportal.jamendo.com/login)
 
 * 🌦️ **OpenWeather API Key**:
-  Register and create a key at [OpenWeather](https://home.openweathermap.org/api_keys)
+  Register and create a key at [OpenWeather](https://home.openweathermap.org/users/sign_in)
 
 * 🤖 **Gemini API Key**:
-  Access and generate your API key from [Google Gemini](https://ai.google.dev)
+  Access and generate your API key from [Google Gemini](https://aistudio.google.com/app/apikey)
 ---
 
 4. Run the development server:
