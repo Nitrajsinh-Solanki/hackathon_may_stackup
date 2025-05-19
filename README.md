@@ -64,33 +64,63 @@
    npm install
    ```
 
+
 ---
 
-### 🔐 3. Set up `.env.local`
+### 🔐 3. Set up `.env`
 
-Create a `.env.local` file in the root of the project and add the following environment variables:
+Create a `.env` file in the root of the project and add the following environment variables:
 
 ```env
-# Database
+# Database (MongoDB Atlas)
 MONGODB_URI=your_mongodb_uri
 
-# Email (for OTP verification)
+# Email (for OTP verification via Nodemailer)
 EMAIL_USER=your_email_address
 EMAIL_PASSWORD=your_email_password
 
-# JWT secret
+# JWT secret (for user sessions)
 JWT_SECRET=your_jwt_secret
 
-# Cloudinary (for music uploads)
+# Cloudinary (for uploading and hosting audio files)
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
 # Public API keys
 NEXT_PUBLIC_JAMENDO_CLIENT_ID=your_jamendo_client_id
+
 NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
+
 NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 ```
+
+
+### 🧩 Need help setting these up?
+
+* 🔗 **MongoDB URI**:
+  Get it from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) after setting up a free cluster.
+  📽️ [Video tutorial](https://youtu.be/SMXbGrKe5gM?feature=shared)
+
+* 📧 **Email credentials for Nodemailer**:
+  If you're using Gmail, enable 2FA and generate an App Password instead of using your real password.
+  📽️ [How to generate a Gmail App Password](https://youtu.be/FT-AiOcw-50?feature=shared)
+
+* 🔐 **JWT Secret**:
+  Generate a secure token using this free tool:
+  [JWT Generator](https://www.javainuse.com/jwtgenerator)
+
+* ☁️ **Cloudinary credentials**:
+  Create an account and get your API keys from your [Cloudinary dashboard](https://cloudinary.com/)
+
+* 🎶 **Jamendo API Key**:
+  Sign up as a developer and create an app at [Jamendo Developer Portal](https://developer.jamendo.com/v3.0)
+
+* 🌦️ **OpenWeather API Key**:
+  Register and create a key at [OpenWeather](https://home.openweathermap.org/api_keys)
+
+* 🤖 **Gemini API Key**:
+  Access and generate your API key from [Google Gemini](https://ai.google.dev)
 ---
 
 4. Run the development server:
