@@ -11,7 +11,7 @@
 ## 📚 Table of Contents
 
 1. [🌟 Features](#-features)
-2. [🎮 Video Demo and Showcase](#-live-demo-and-showcase)
+2. [🎮 Video Demo and Showcase](#-video-demo-and-showcase)
 3. [🤔 Why Moodify?](#-why-moodify)
 4. [📂 Directory Structure](#-directory-structure)
 5. [🔌 API Integrations](#-api-integrations)
@@ -47,7 +47,7 @@
 
 ---
 
-## 🎮 Live Demo and Showcase
+## 🎮 Video Demo and Showcase
 
 Experience Moodify in action through our comprehensive video demonstrations:
 
@@ -146,7 +146,7 @@ Each integration is abstracted through our API layer for consistent data handlin
    npm install
    ```
 
----
+
 
 ### 🔐 3. Set-up-env
 Create a `.env` file in the root of the project and add the following environment variables:
@@ -172,7 +172,6 @@ NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
 NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 ```
 
----
 
 ### 🧩 Need help setting these up?
 * 🔗 **MongoDB URI**:
@@ -192,7 +191,6 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
 * 🤖 **Gemini API Key**:
   [Google Gemini API Console](https://aistudio.google.com/app/apikey)
 
----
 
 4. Run the development server:
    ```bash
@@ -230,36 +228,26 @@ Special thanks to:
 
 ## 👥 Contributors
 
-This project was developed by:
+**Nitrajsinh Solanki**: 🧠 AI/Recommendation Engine, 🎵 API Integrations, 🔐 Auth System, 📊 Dashboard, 🌐 Architecture
 
-### Nitrajsinh Solanki
-- 🧠 AI Integration & Recommendation Engine
-- 🎵 Music API Integrations (Jamendo, Deezer, Audius)
-- 🔐 Authentication System
-- 📊 User Dashboard & Analytics
-- 🌐 Project Architecture & Documentation
-
-### Amar Tiwari
-- 🎨 UI/UX Design & Implementation
-- 🎵 Custom Music Player & Visualizer
-- 🌤️ Weather & Geolocation Integration
-- 📱 Responsive Design & Mobile Optimization
-- 🧪 Testing & Quality Assurance
-
-We worked collaboratively to create a seamless music experience that adapts to users' moods and environments. Our combined expertise in AI, API integration, and frontend development made Moodify possible.
-
-
-## 📞 Contact
-
-Have questions or suggestions? Reach out to the developer:
-
-- 💬 Discord: `nitrajsinhsolanki`
-- 💬 Discord: `rexon2.0`
-
-- 🐦 X/Twitter: [@Nitrajsinh2005](https://twitter.com/Nitrajsinh2005)
+**Amar Tiwari**: 🎨 UI/UX, 🎵 Music Player, 🌤️ Geo/Weather Integration, 📱 Responsive Design, 🧪 Testing
 
 ---
+## 📞 Contact
 
+Have questions or suggestions? Reach out to the developers:
+
+### Nitrajsinh Solanki
+- 📧 Email: nrsolanki2005@gmail.com
+- 💬 Discord: `nitrajsinhsolanki`
+- 🐦 X/Twitter: [@Nitrajsinh2005](https://twitter.com/Nitrajsinh2005)
+
+### Amar Tiwari
+- 📧 Email: amar.tiwari.8355@gmail.com
+- 💬 Discord: `rexon2.0`
+- 🐦 X/Twitter: [@Tiwari__Amar](https://twitter.com/Tiwari__Amar)
+
+---
 
 ## 📜 License
 
