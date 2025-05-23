@@ -9,6 +9,7 @@
 ---
 
 ## 📚 Table of Contents
+
 1. [🌟 Features](#-features)
 2. [🎮 Video Demo and Showcase](#-live-demo-and-showcase)
 3. [🤔 Why Moodify?](#-why-moodify)
@@ -17,9 +18,10 @@
 6. [🚀 Getting Started](#-installation)
 7. [🔐 Authentication Workflow](#-authentication-workflow)
 8. [🛠 Tech Stack](#-tech-stack)
-9. [📜 License](#-license)
+9. [👥 Contributors](#-contributors)
 10. [🙏 Acknowledgements](#-acknowledgements)
 11. [📞 Contact](#-contact)
+12. [📜 License](#-license)
 
 ---
 
@@ -225,14 +227,39 @@ Special thanks to:
 
 ---
 
+
+## 👥 Contributors
+
+This project was developed by:
+
+### Nitrajsinh Solanki
+- 🧠 AI Integration & Recommendation Engine
+- 🎵 Music API Integrations (Jamendo, Deezer, Audius)
+- 🔐 Authentication System
+- 📊 User Dashboard & Analytics
+- 🌐 Project Architecture & Documentation
+
+### Amar Tiwari
+- 🎨 UI/UX Design & Implementation
+- 🎵 Custom Music Player & Visualizer
+- 🌤️ Weather & Geolocation Integration
+- 📱 Responsive Design & Mobile Optimization
+- 🧪 Testing & Quality Assurance
+
+We worked collaboratively to create a seamless music experience that adapts to users' moods and environments. Our combined expertise in AI, API integration, and frontend development made Moodify possible.
+
+
 ## 📞 Contact
 
 Have questions or suggestions? Reach out to the developer:
 
 - 💬 Discord: `nitrajsinhsolanki`
+- 💬 Discord: `rexon2.0`
+
 - 🐦 X/Twitter: [@Nitrajsinh2005](https://twitter.com/Nitrajsinh2005)
 
 ---
+
 
 ## 📜 License
 
