@@ -59,15 +59,15 @@ Experience Moodify in action through our comprehensive video demonstrations:
 
 ---
 
-## 🤔 Why Moodify?
+## ❓ Why Moodify?
 
-Moodify stands out from traditional music platforms by:
-
-* **Contextual Understanding**: We don't just recommend music; we understand your environment and mood.
-* **Multi-Source Integration**: Access music from various platforms in one unified experience.
-* **AI-Powered Personalization**: Our recommendation engine learns and evolves with your listening habits.
-* **Privacy-Focused**: Your data stays on your device, with transparent AI processing.
-* **Developer-Friendly**: Built with modern tech stack and well-documented for easy contributions.
+* 🎯 **Smart Mood Matching** – Get music tailored to your current location, weather, and time of day.
+* 🧠 **Truly Personalized** – Understands your tastes, likes, and habits for ultra-relevant recommendations.
+* 🔌 **All-in-One Streaming** – Streams from Jamendo, Audius, and Deezer in one unified experience.
+* 🎶 **Your Music, Your Way** – Like, save, upload, and organize your favorite tracks and playlists.
+* 💬 **AI Music Chat** – Discover music conversationally with Gemini-powered chat assistant.
+* 📊 **Insights That Matter** – Track your listening history and get AI-generated summaries.
+* 🔐 **Private and Secure** – Your data stays yours with JWT auth, OTP verification, and full transparency.
 
 ---
 
@@ -210,9 +210,6 @@ Moodify implements a secure authentication system:
 3. **Login**: Secure JWT-based authentication
 4. **Password Recovery**: Email-based reset flow
 5. **Session Management**: Persistent login with secure cookies
-
-All authentication routes are protected with rate limiting and CSRF protection.
-
 ---
 
 ## 🙏 Acknowledgements
