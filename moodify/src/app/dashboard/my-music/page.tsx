@@ -110,35 +110,57 @@ export default function MyMusic() {
     };
 
     fetchTracks();
-    // initializng the  audio element
+
+    // initializing the audio element
     const audio = new Audio();
     audioRef.current = audio;
-    audio.addEventListener("timeupdate", () => {
+
+    const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-    });
-    audio.addEventListener("loadedmetadata", () => {
+    };
+
+    const handleLoadedMetadata = () => {
       setDuration(audio.duration);
-    });
-    audio.addEventListener("ended", () => {
+    };
+
+    const handleEnded = () => {
       setIsPlaying(false);
       setCurrentlyPlaying(null);
-    });
-    audio.addEventListener("play", () => {
+    };
+
+    const handlePlay = () => {
       setIsPlaying(true);
-    });
-    audio.addEventListener("pause", () => {
+    };
+
+    const handlePause = () => {
       setIsPlaying(false);
-    });
+    };
+
+    const handleError = (e: any) => {
+      console.error("Audio error event triggered:", e);
+      setError(
+        "Failed to load audio. The file may be missing or in an unsupported format."
+      );
+    };
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("error", handleError);
 
     return () => {
       if (audio) {
         audio.pause();
         audio.src = "";
-        audio.removeEventListener("timeupdate", () => {});
-        audio.removeEventListener("loadedmetadata", () => {});
-        audio.removeEventListener("ended", () => {});
-        audio.removeEventListener("play", () => {});
-        audio.removeEventListener("pause", () => {});
+
+        audio.removeEventListener("timeupdate", handleTimeUpdate);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener("play", handlePlay);
+        audio.removeEventListener("pause", handlePause);
+        audio.removeEventListener("error", handleError);
       }
     };
   }, [router]);
@@ -235,6 +257,19 @@ export default function MyMusic() {
     router.push("/dashboard/upload", { scroll: false });
   };
 
+  const closePlayer = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+
+      audioRef.current.removeAttribute("src");
+
+      audioRef.current.load();
+    }
+
+    setCurrentlyPlaying(null);
+    setIsPlaying(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -317,19 +352,19 @@ export default function MyMusic() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="hidden sm:block col-span-2 text-gray-400">
                   {formatDuration(track.duration)}
                 </div>
                 <div className="hidden sm:block col-span-2 text-gray-400 truncate">
                   {track.genre || "Unknown"}
                 </div>
-                
+
                 <div className="flex sm:hidden justify-between items-center mt-2 text-sm text-gray-400">
                   <span>{formatDuration(track.duration)}</span>
                   <span>{track.genre || "Unknown"}</span>
                 </div>
-                
+
                 <div className="col-span-1 sm:col-span-3 flex items-center justify-end sm:justify-center space-x-3 mt-3 sm:mt-0">
                   <button
                     onClick={() => handlePlay(track._id, track.cloudinaryUrl)}
@@ -385,7 +420,7 @@ export default function MyMusic() {
           </div>
         </div>
       )}
-      
+
       {/* audio player with visualizer */}
       {currentlyPlaying && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900/90 backdrop-blur-md border-t border-gray-800 p-4 z-50 hidden sm:block">
@@ -417,7 +452,7 @@ export default function MyMusic() {
                   </p>
                 </div>
               </div>
-              
+
               {/* player controls */}
               <div className="flex flex-col items-center space-y-2 flex-1 max-w-xl mx-4 w-full">
                 <div className="flex items-center space-x-4">
@@ -477,7 +512,7 @@ export default function MyMusic() {
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <button
                   onClick={toggleMute}
@@ -495,13 +530,7 @@ export default function MyMusic() {
                   className="w-20 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
                 />
                 <button
-                  onClick={() => {
-                    setCurrentlyPlaying(null);
-                    if (audioRef.current) {
-                      audioRef.current.pause();
-                      audioRef.current.src = "";
-                    }
-                  }}
+                  onClick={closePlayer}
                   className="ml-4 text-gray-400 hover:text-white"
                 >
                   <X size={20} />
@@ -511,7 +540,7 @@ export default function MyMusic() {
           </div>
         </div>
       )}
-      
+
       {/* mobile player */}
       {currentlyPlaying && (
         <div className="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 p-3 sm:hidden">
@@ -540,8 +569,12 @@ export default function MyMusic() {
                 )}
               </button>
               <div className="max-w-[120px]">
-                <p className="text-white font-medium truncate">{currentTrack?.title}</p>
-                <p className="text-gray-400 text-sm truncate">{currentTrack?.artist}</p>
+                <p className="text-white font-medium truncate">
+                  {currentTrack?.title}
+                </p>
+                <p className="text-gray-400 text-sm truncate">
+                  {currentTrack?.artist}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -558,21 +591,12 @@ export default function MyMusic() {
                   cloudinaryUrl={currentTrack.cloudinaryUrl}
                 />
               )}
-              <button
-                onClick={() => {
-                  setCurrentlyPlaying(null);
-                  if (audioRef.current) {
-                    audioRef.current.pause();
-                    audioRef.current.src = "";
-                  }
-                }}
-                className="text-gray-400"
-              >
+              <button onClick={closePlayer} className="text-gray-400">
                 <X className="h-6 w-6" />
               </button>
             </div>
           </div>
-          
+
           {/* mobile progress bar */}
           <div className="mt-2">
             <input
@@ -590,7 +614,7 @@ export default function MyMusic() {
           </div>
         </div>
       )}
-      
+
       {/* playlist selector modal */}
       {selectedTrack && (
         <MyMusicPlaylistSelector
@@ -601,5 +625,4 @@ export default function MyMusic() {
       )}
     </div>
   );
-  
 }
