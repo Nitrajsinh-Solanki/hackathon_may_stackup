@@ -1,6 +1,6 @@
 # 🎧 Moodify
 
-🎧 **Moodify** is a full-featured AI-powered music web application built with Next.js, TypeScript, and Tailwind CSS. It leverages 🌍 geolocation, 🌤️ weather data, 🎶 user listening behavior, and 🔌 modern music APIs to deliver personalized music recommendations and immersive listening experiences. Whether you're vibing to the weather or exploring your favorite playlists, Moodify brings your mood to life through music.
+🎧 **Moodify** is  full-featured AI-powered music web application built with Next.js, TypeScript, and Tailwind CSS. It leverages 🌍 geolocation, 🌤️ weather data, 🎶 user listening behavior, and 🔌 modern music APIs to deliver personalized music recommendations and immersive listening experiences. Whether you're vibing to the weather or exploring your favorite playlists, Moodify brings your mood to life through music.
 
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-14-blue)
