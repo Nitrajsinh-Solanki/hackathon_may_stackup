@@ -1,10 +1,24 @@
-# 🎧 Moodify
 
 🎧 **Moodify** is  full-featured AI-powered music web application built with Next.js, TypeScript, and Tailwind CSS. It leverages 🌍 geolocation, 🌤️ weather data, 🎶 user listening behavior, and 🔌 modern music APIs to deliver personalized music recommendations and immersive listening experiences. Whether you're vibing to the weather or exploring your favorite playlists, Moodify brings your mood to life through music.
 
 ![MIT License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-14-blue)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-green)
+
+---
+# 🎧 Moodify — 🏆 Won $20 Merit Prize on StackUp Hackathon
+
+🎉 Developed by **Nitrajsinh Solanki** and **Amar Tiwari**  
+💰 Awarded **$10 each** for a total **$20 Merit Prize** for our AI-powered music app submission!
+
+---
+
+## 🖼️ Prize & Challenge Screenshots
+
+![Screenshot](./Screenshot%202025-06-29%20145953.png)  
+![Screenshot](./Screenshot%202025-06-29%20150017.png)  
+![Screenshot](./Screenshot%202025-06-29%20150039.png)  
+![Screenshot](./Screenshot%202025-06-29%20150105.png)
 
 ---
 
